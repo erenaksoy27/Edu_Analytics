@@ -46,6 +46,12 @@ public partial class MainViewModel : ObservableObject
             case ExamAnalysisViewModel ea:
                 ea.OpenAnswerEntryRequested -= OnOpenAnswerEntryRequested;
                 break;
+            case QuestionBankViewModel qb:
+                qb.QuestionCreateRequested -= OnQuestionCreateRequested;
+                break;
+            case SingleQuestionCreateViewModel sq:
+                sq.QuestionSaved -= OnSingleQuestionSaved;
+                break;
         }
     }
 
@@ -98,6 +104,19 @@ public partial class MainViewModel : ObservableObject
         DetachCurrentView();
         ActiveMenu = "QuestionBank";
         var vm = _services.GetRequiredService<QuestionBankViewModel>();
+        vm.QuestionCreateRequested += OnQuestionCreateRequested;
+        _ = vm.LoadAsync();
+        CurrentView = vm;
+    }
+
+    private void OnQuestionCreateRequested()
+    {
+        // Change from NavigateToCreateExam() to open a specific single question creation page.
+        // It looks like SingleQuestionCreateViewModel is needed here
+        DetachCurrentView();
+        ActiveMenu = "SingleQuestionCreate";
+        var vm = _services.GetRequiredService<SingleQuestionCreateViewModel>();
+        vm.QuestionSaved += OnSingleQuestionSaved;
         _ = vm.LoadAsync();
         CurrentView = vm;
     }
@@ -154,5 +173,10 @@ public partial class MainViewModel : ObservableObject
     private void OnExamSaved()
     {
         NavigateToDashboard();
+    }
+
+    private void OnSingleQuestionSaved()
+    {
+        NavigateToQuestionBank();
     }
 }

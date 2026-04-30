@@ -32,6 +32,9 @@ public partial class QuestionBankViewModel : ObservableObject
     [ObservableProperty] private string? _errorMessage;
     [ObservableProperty] private string? _successMessage;
 
+    // Yeni eklenecek command
+    public event Action? QuestionCreateRequested;
+
     public QuestionBankViewModel(IQuestionBankService bankService, IExamCrudService examService)
     {
         _bankService = bankService;
@@ -91,6 +94,12 @@ public partial class QuestionBankViewModel : ObservableObject
 
     [RelayCommand]
     private Task SearchAsync() => SearchSafelyAsync();
+
+    [RelayCommand]
+    private void NavigateToCreateQuestion()
+    {
+        QuestionCreateRequested?.Invoke();
+    }
 
     /// <summary>
     /// Tek seferde sadece bir search çalışır — DbContext concurrency hatasını engeller.

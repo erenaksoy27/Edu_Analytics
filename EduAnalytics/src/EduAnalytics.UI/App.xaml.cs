@@ -89,6 +89,7 @@ public partial class App : Application
         // FAZ 4 — İleri özellikler
         services.AddTransient<QuestionGroupEditorViewModel>();
         services.AddTransient<ExamFromBankViewModel>();
+        services.AddTransient<SingleQuestionCreateViewModel>();
 
         // FAZ 5 — Rubric (klasik soru kriter-bazlı puanlama)
         services.AddTransient<IRubricService, RubricService>();

@@ -39,6 +39,9 @@
         <DataTemplate DataType="{x:Type vm:ExamFromBankViewModel}">
             <views:ExamFromBankView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SingleQuestionCreateViewModel}">
+            <views:SingleQuestionCreateView/>
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
