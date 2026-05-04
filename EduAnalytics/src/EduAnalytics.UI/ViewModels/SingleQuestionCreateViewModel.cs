@@ -91,16 +91,42 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
         {
             var userId = await _service.GetDefaultUserIdAsync();
 
-            var model = new ExamCreateModel
-            {
-                CourseId = SelectedCourse.Id,
-                Title = "Single Question Draft",
-                ExamDate = DateTime.Today,
-                CreatedByUserId = userId,
-                Questions = new System.Collections.Generic.List<QuestionCreateModel> { Question.ToCreateModel() }
-            };
+            // Dependency Injection üzerinden IQuestionBankService'i de eklemeliyiz.
+            // Bu ViewModel içinden geçici olarak baðýmlýlýðý alalým
+            var bankService = UI.App.Services.GetService(typeof(IQuestionBankService)) as IQuestionBankService;
 
-            await _service.CreateExamAsync(model);
+            if (bankService != null)
+            {
+                var qm = Question.ToCreateModel();
+
+                var model = new QuestionBankCreateModel
+                {
+                    CourseId = SelectedCourse.Id,
+                    QuestionGroupId = qm.QuestionGroupId,
+                    Type = qm.Type,
+                    MaxPoints = qm.MaxPoints,
+                    QuestionText = qm.QuestionText,
+                    OptionA = qm.OptionA,
+                    OptionB = qm.OptionB,
+                    OptionC = qm.OptionC,
+                    OptionD = qm.OptionD,
+                    OptionE = qm.OptionE,
+                    CorrectOption = qm.CorrectOption,
+                    AnswerKey = qm.AnswerKey,
+                    IsActive = qm.IsActive,
+                    IsFavorite = qm.IsFavorite,
+                    CreatedByUserId = userId,
+                    TopicIds = qm.TopicIds,
+                    LearningOutcomeIds = qm.LearningOutcomeIds
+                };
+
+                await bankService.CreateAsync(model);
+            }
+            else
+            {
+                 ErrorMessage = "Soru bankasý servisi alýnamadý.";
+                 return;
+            }
 
             SuccessMessage = "Soru baþarýyla oluþturuldu.";
             Question = new QuestionEditViewModel { QuestionNumber = 1 };
