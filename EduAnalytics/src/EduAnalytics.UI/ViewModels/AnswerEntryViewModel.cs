@@ -24,6 +24,9 @@ public partial class AnswerEntryViewModel : ObservableObject
     /// <summary>View klasik soru için kriter puanlama dialogunu açmak üzere bunu dinler.</summary>
     public event Action<int, int>? OpenRubricRequested;
 
+    /// <summary>Geri butonu / kayıt sonrası analiz ekranına geri dönüş için.</summary>
+    public event Action<int>? BackRequested;
+
     [ObservableProperty] private string _examTitle = string.Empty;
     [ObservableProperty] private string _courseName = string.Empty;
     [ObservableProperty] private int _bookletCount = 1;
@@ -409,6 +412,9 @@ public partial class AnswerEntryViewModel : ObservableObject
 
             await _service.SaveAsync(_examId, updates);
             SuccessMessage = $"✓ {updates.Count} cevap kaydedildi.";
+
+            // Kayıt başarılı; analiz ekranına geri dön.
+            BackRequested?.Invoke(_examId);
         }
         catch (Exception ex)
         {
@@ -419,6 +425,12 @@ public partial class AnswerEntryViewModel : ObservableObject
         {
             IsSaving = false;
         }
+    }
+
+    [RelayCommand]
+    private void GoBack()
+    {
+        BackRequested?.Invoke(_examId);
     }
 
     [RelayCommand]

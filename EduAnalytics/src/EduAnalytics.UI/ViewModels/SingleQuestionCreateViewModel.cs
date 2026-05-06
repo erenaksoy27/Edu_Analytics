@@ -3,9 +3,10 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EduAnalytics.Business.Dtos;
 using EduAnalytics.Business.Services.Interfaces;
 using EduAnalytics.Core.Entities;
-using EduAnalytics.Business.Dtos;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EduAnalytics.UI.ViewModels;
 
@@ -19,14 +20,18 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
     [ObservableProperty] private Course? _selectedCourse;
 
     [ObservableProperty] private QuestionEditViewModel _question = new();
-    
+
     [ObservableProperty] private string? _errorMessage;
     [ObservableProperty] private string? _successMessage;
     [ObservableProperty] private bool _isSaving;
 
-    public SingleQuestionCreateViewModel(IExamCrudService service)
+    /// <summary>Ä°kinci sekme: ortak gÃ¶vdeli (common-stem) soru grubu editÃ¶rÃ¼.</summary>
+    public QuestionGroupEditorViewModel GroupEditor { get; }
+
+    public SingleQuestionCreateViewModel(IExamCrudService service, QuestionGroupEditorViewModel groupEditor)
     {
         _service = service;
+        GroupEditor = groupEditor;
         Question.QuestionNumber = 1;
     }
 
@@ -42,10 +47,13 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
             {
                 SelectedCourse = Courses[0];
             }
+
+            // Ä°liÅŸkili Soru sekmesini de yÃ¼kle
+            await GroupEditor.LoadAsync();
         }
         catch (Exception ex)
         {
-            ErrorMessage = "Veriler yüklenemedi: " + ex.Message;
+            ErrorMessage = "Veriler yÃ¼klenemedi: " + ex.Message;
         }
     }
 
@@ -53,6 +61,9 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
     {
         _ = ReloadTopicsAsync();
         Question.AvailableTopics.Clear();
+        // Clear learning outcomes lists as well when course changes
+        Question.AvailableLearningOutcomes.Clear();
+        Question.SelectedLearningOutcomes.Clear();
     }
 
     private async Task ReloadTopicsAsync()
@@ -63,6 +74,15 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
             var topics = await _service.GetTopicsForCourseAsync(SelectedCourse.Id);
             Question.AvailableTopics.Clear();
             foreach (var t in topics) Question.AvailableTopics.Add(t);
+
+            // Load learning outcomes for the selected course
+            var loService = App.Services.GetService<ILearningOutcomeService>();
+            if (loService != null)
+            {
+                var los = await loService.GetByCourseAsync(SelectedCourse.Id);
+                Question.AvailableLearningOutcomes.Clear();
+                foreach (var lo in los) Question.AvailableLearningOutcomes.Add(lo);
+            }
         }
         catch { }
     }
@@ -75,7 +95,7 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
 
         if (SelectedCourse == null)
         {
-            ErrorMessage = "Lütfen bir ders seçin.";
+            ErrorMessage = "LÃ¼tfen bir ders seÃ§in.";
             return;
         }
 
@@ -91,9 +111,8 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
         {
             var userId = await _service.GetDefaultUserIdAsync();
 
-            // Dependency Injection üzerinden IQuestionBankService'i de eklemeliyiz.
-            // Bu ViewModel içinden geçici olarak baðýmlýlýðý alalým
-            var bankService = UI.App.Services.GetService(typeof(IQuestionBankService)) as IQuestionBankService;
+            // DI Ã¼zerinden IQuestionBankService'i alalÄ±m
+            var bankService = App.Services.GetService<IQuestionBankService>();
 
             if (bankService != null)
             {
@@ -124,17 +143,17 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
             }
             else
             {
-                 ErrorMessage = "Soru bankasý servisi alýnamadý.";
-                 return;
+                ErrorMessage = "Soru bankasÄ± servisi alÄ±namadÄ±.";
+                return;
             }
 
-            SuccessMessage = "Soru baþarýyla oluþturuldu.";
+            SuccessMessage = "Soru baÅŸarÄ±yla oluÅŸturuldu.";
             Question = new QuestionEditViewModel { QuestionNumber = 1 };
             QuestionSaved?.Invoke();
         }
         catch (Exception ex)
         {
-            ErrorMessage = "Kayýt hatasý: " + ex.Message;
+            ErrorMessage = "KayÄ±t hatasÄ±: " + ex.Message;
         }
         finally
         {

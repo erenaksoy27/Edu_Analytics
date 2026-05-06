@@ -52,7 +52,14 @@ public partial class AnswerEntryView : UserControl
         dialog.Bind(rubricVm);
 
         if (dialog.ShowDialog() == true)
+        {
+            // Kaydedilen toplam puanı ilgili hücreye anında yansıt — listede de güncel görünsün.
+            var cell = student.Cells.FirstOrDefault(c => c.QuestionId == questionId);
+            if (cell != null)
+                cell.Score = rubricVm.TotalScore;
+
             await vm.ReloadAsync();
+        }
     }
 
     /// <summary>
@@ -141,8 +148,11 @@ public partial class AnswerEntryView : UserControl
                     UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
                     TargetNullValue = string.Empty
                 });
-                tbFactory.SetValue(FrameworkElement.WidthProperty, 55.0);
+                tbFactory.SetValue(FrameworkElement.WidthProperty, 60.0);
+                tbFactory.SetValue(FrameworkElement.HeightProperty, 26.0);
+                tbFactory.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
                 tbFactory.SetValue(Control.PaddingProperty, new Thickness(4, 2, 4, 2));
+                tbFactory.SetValue(Control.VerticalContentAlignmentProperty, VerticalAlignment.Center);
                 tbFactory.SetValue(TextBox.TextAlignmentProperty, TextAlignment.Center);
                 tbFactory.SetValue(Control.BackgroundProperty,
                     new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF9C3")));
@@ -150,12 +160,13 @@ public partial class AnswerEntryView : UserControl
                 var btnFactory = new FrameworkElementFactory(typeof(Button));
                 btnFactory.SetValue(Button.ContentProperty, "📋");
                 btnFactory.SetValue(Button.ToolTipProperty, "Detaylı (kriter-bazlı) puanla");
-                btnFactory.SetValue(FrameworkElement.WidthProperty, 28.0);
-                btnFactory.SetValue(FrameworkElement.HeightProperty, 22.0);
-                btnFactory.SetValue(FrameworkElement.MarginProperty, new Thickness(2, 0, 0, 0));
+                btnFactory.SetValue(FrameworkElement.WidthProperty, 26.0);
+                btnFactory.SetValue(FrameworkElement.HeightProperty, 26.0);
+                btnFactory.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+                btnFactory.SetValue(FrameworkElement.MarginProperty, new Thickness(4, 0, 0, 0));
                 btnFactory.SetValue(Control.PaddingProperty, new Thickness(0));
                 btnFactory.SetValue(Control.BorderThicknessProperty, new Thickness(1));
-                btnFactory.SetValue(Control.FontSizeProperty, 10.0);
+                btnFactory.SetValue(Control.FontSizeProperty, 11.0);
                 btnFactory.SetValue(FrameworkElement.CursorProperty, System.Windows.Input.Cursors.Hand);
                 btnFactory.SetBinding(Button.CommandProperty, new Binding("DataContext.OpenRubricDialogCommand")
                 {
@@ -174,7 +185,7 @@ public partial class AnswerEntryView : UserControl
                 {
                     Header = header,
                     CellTemplate = template,
-                    Width = new DataGridLength(110)
+                    Width = new DataGridLength(120)
                 };
             }
 

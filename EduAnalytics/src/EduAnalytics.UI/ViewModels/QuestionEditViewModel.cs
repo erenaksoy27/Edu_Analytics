@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Core.Entities;
 using EduAnalytics.Core.Enums;
+using EduAnalytics.Business.Dtos;
 
 namespace EduAnalytics.UI.ViewModels;
 
@@ -37,10 +38,22 @@ public partial class QuestionEditViewModel : ObservableObject
     public ObservableCollection<Topic> AvailableTopics { get; } = new();
 
     /// <summary>Bu soruya bağlanmış konular.</summary>
-    public ObservableCollection<Topic> SelectedTopics { get; } = new();
+    public ObservableCollection<Topic> SelectedTopics { get; set; } = new();
 
     [ObservableProperty]
     private Topic? _topicToAdd;
+
+    // --- Learning Outcomes support ---
+    /// <summary>Mevcut ders için tüm öğrenim çıktıları (ÖÇ).</summary>
+    public ObservableCollection<LearningOutcomeDto> AvailableLearningOutcomes { get; } = new();
+
+    /// <summary>Bu soruya bağlanmış öğrenim çıktıları.</summary>
+    public ObservableCollection<LearningOutcomeDto> SelectedLearningOutcomes { get; set; } = new();
+
+    [ObservableProperty]
+    private LearningOutcomeDto? _learningOutcomeToAdd;
+
+    // ----------------------------------
 
     public bool IsMultipleChoice => Type == QuestionType.MultipleChoice;
     public bool IsOpenEnded => Type == QuestionType.OpenEnded;
@@ -60,6 +73,23 @@ public partial class QuestionEditViewModel : ObservableObject
     {
         if (topic != null)
             SelectedTopics.Remove(topic);
+    }
+
+    [RelayCommand]
+    private void AddLearningOutcome()
+    {
+        if (LearningOutcomeToAdd != null && !SelectedLearningOutcomes.Any(lo => lo.Id == LearningOutcomeToAdd.Id))
+        {
+            SelectedLearningOutcomes.Add(LearningOutcomeToAdd);
+        }
+        LearningOutcomeToAdd = null;
+    }
+
+    [RelayCommand]
+    private void RemoveLearningOutcome(LearningOutcomeDto? lo)
+    {
+        if (lo != null)
+            SelectedLearningOutcomes.Remove(lo);
     }
 
     /// <summary>
@@ -94,7 +124,7 @@ public partial class QuestionEditViewModel : ObservableObject
             IsActive = true,
             IsFavorite = false,
             TopicIds = SelectedTopics.Select(t => t.Id).ToList(),
-            LearningOutcomeIds = new List<int>(),
+            LearningOutcomeIds = SelectedLearningOutcomes.Select(lo => lo.Id).ToList(),
             QuestionGroupId = null
         };
     }
@@ -108,8 +138,6 @@ public partial class QuestionEditViewModel : ObservableObject
             return $"Soru {QuestionNumber}: Soru metni boş olamaz.";
         if (MaxPoints <= 0)
             return $"Soru {QuestionNumber}: Puan 0'dan büyük olmalı.";
-        if (SelectedTopics.Count == 0)
-            return $"Soru {QuestionNumber}: En az bir konu seçilmeli.";
 
         if (IsMultipleChoice)
         {

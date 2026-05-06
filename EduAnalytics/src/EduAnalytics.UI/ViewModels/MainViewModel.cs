@@ -52,6 +52,9 @@ public partial class MainViewModel : ObservableObject
             case SingleQuestionCreateViewModel sq:
                 sq.QuestionSaved -= OnSingleQuestionSaved;
                 break;
+            case AnswerEntryViewModel ae:
+                ae.BackRequested -= OnAnswerEntryBackRequested;
+                break;
         }
     }
 
@@ -151,6 +154,36 @@ public partial class MainViewModel : ObservableObject
         CurrentView = vm;
     }
 
+    [RelayCommand]
+    private void NavigateToProgramOutcomeMapping()
+    {
+        DetachCurrentView();
+        ActiveMenu = "ProgramOutcomeMapping";
+        var vm = _services.GetRequiredService<ProgramOutcomeMappingViewModel>();
+        _ = vm.LoadAsync();
+        CurrentView = vm;
+    }
+
+    [RelayCommand]
+    private void NavigateToStudents()
+    {
+        DetachCurrentView();
+        ActiveMenu = "Students";
+        var vm = _services.GetRequiredService<StudentManagementViewModel>();
+        _ = vm.LoadAsync();
+        CurrentView = vm;
+    }
+
+    [RelayCommand]
+    private void NavigateToAcademicStructure()
+    {
+        DetachCurrentView();
+        ActiveMenu = "AcademicStructure";
+        var vm = _services.GetRequiredService<AcademicStructureViewModel>();
+        _ = vm.LoadAsync();
+        CurrentView = vm;
+    }
+
     private void OnOpenAnalysisRequested(int examId)
     {
         DetachCurrentView();
@@ -166,8 +199,14 @@ public partial class MainViewModel : ObservableObject
         DetachCurrentView();
         ActiveMenu = "Cevap";
         var vm = _services.GetRequiredService<AnswerEntryViewModel>();
+        vm.BackRequested += OnAnswerEntryBackRequested;
         _ = vm.LoadAsync(examId);
         CurrentView = vm;
+    }
+
+    private void OnAnswerEntryBackRequested(int examId)
+    {
+        OnOpenAnalysisRequested(examId);
     }
 
     private void OnExamSaved()

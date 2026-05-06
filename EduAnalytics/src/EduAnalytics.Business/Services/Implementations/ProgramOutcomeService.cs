@@ -193,4 +193,44 @@ public class ProgramOutcomeService : IProgramOutcomeService
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<List<LearningOutcomeDto>> GetAllLearningOutcomesInProgramAsync(int programId)
+    {
+        return await _context.LearningOutcomes
+            .Include(lo => lo.Course)
+            .Where(lo => lo.Course.ProgramId == programId)
+            .Select(lo => new LearningOutcomeDto
+            {
+                Id = lo.Id,
+                CourseId = lo.CourseId,
+                Code = lo.Code,
+                Name = lo.Course.Name + " — " + lo.Code + " " + lo.Name,
+                Description = lo.Description,
+                TopicCount = lo.TopicLearningOutcomes.Count,
+                QuestionCount = lo.QuestionLearningOutcomes.Count,
+                ProgramOutcomeCodes = lo.ProgramOutcomeMappings
+                    .Select(m => m.ProgramOutcome.Code)
+                    .ToList()
+            })
+            .OrderBy(lo => lo.Name)
+            .ToListAsync();
+    }
+
+    public async Task<List<MappedLearningOutcomeDto>> GetMappedLearningOutcomesAsync(int programOutcomeId)
+    {
+        return await _context.ProgramOutcomeMappings
+            .Include(m => m.LearningOutcome)
+                .ThenInclude(lo => lo.Course)
+            .Where(m => m.ProgramOutcomeId == programOutcomeId)
+            .Select(m => new MappedLearningOutcomeDto
+            {
+                LearningOutcomeId = m.LearningOutcomeId,
+                Code = m.LearningOutcome.Code,
+                Name = m.LearningOutcome.Name,
+                CourseName = m.LearningOutcome.Course.Name,
+                ContributionLevel = m.ContributionLevel
+            })
+            .OrderBy(m => m.CourseName).ThenBy(m => m.Code)
+            .ToListAsync();
+    }
 }

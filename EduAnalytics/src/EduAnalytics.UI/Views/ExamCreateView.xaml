@@ -7,6 +7,7 @@
              d:DataContext="{d:DesignInstance Type=vm:ExamCreateViewModel}"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
+             xmlns:conv="clr-namespace:EduAnalytics.UI.Converters"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
 
 	<UserControl.Resources>
@@ -16,6 +17,7 @@
 				<x:Type TypeName="enums:QuestionType"/>
 			</ObjectDataProvider.MethodParameters>
 		</ObjectDataProvider>
+        <conv:ContainsLearningOutcomeConverter x:Key="ContainsLoConverter"/>
 	</UserControl.Resources>
 
 	<Grid>
@@ -435,40 +437,52 @@
                                                  Margin="0,0,0,12"/>
 									</StackPanel>
 
-									<TextBlock Text="Konular (Bologna Çıktıları)" FontWeight="SemiBold" Margin="0,0,0,4"/>
-
+                                    <!-- Yeni: Öğrenim Çıktıları (ÖÇ) seçimi - multi-select with filter and checkboxes -->
+                                    <TextBlock Text="Öğrenim Çıktıları (ÖÇ)" FontWeight="SemiBold" Margin="12,12,0,4"/>
 									<Grid Margin="0,0,0,8">
-										<Grid.ColumnDefinitions>
-											<ColumnDefinition Width="*"/>
-											<ColumnDefinition Width="Auto"/>
-										</Grid.ColumnDefinitions>
-										<ComboBox Grid.Column="0"
-                                                  ItemsSource="{Binding AvailableTopics}"
-                                                  SelectedItem="{Binding TopicToAdd}"
-                                                  Padding="8,4" VerticalAlignment="Center">
-											<ComboBox.ItemTemplate>
-												<DataTemplate>
-													<StackPanel Orientation="Horizontal">
-														<TextBlock Text="H" Foreground="{StaticResource TextSecondaryBrush}"/>
-														<TextBlock Text="{Binding WeekNumber}" Foreground="{StaticResource TextSecondaryBrush}"/>
-														<TextBlock Text=" — "/>
-														<TextBlock Text="{Binding Title}"/>
-													</StackPanel>
-												</DataTemplate>
-											</ComboBox.ItemTemplate>
-										</ComboBox>
-										<Button Grid.Column="1"
-                                                Content="+ Ekle"
-                                                Command="{Binding AddTopicCommand}"
-                                                Background="{StaticResource SuccessBrush}"
-                                                Foreground="White"
-                                                Padding="12,6"
-                                                BorderThickness="0"
-                                                Margin="8,0,0,0"
-                                                Cursor="Hand"/>
+										<Grid.RowDefinitions>
+											<RowDefinition Height="Auto"/>
+											<RowDefinition Height="*"/>
+										</Grid.RowDefinitions>
+
+										<TextBox x:Name="LoFilterTextBox" Grid.Row="0" Margin="0,0,0,8" Padding="8,6" TextChanged="LoFilterTextBox_TextChanged" Tag="{Binding ElementName=LoListBox}" />
+
+										<Grid Grid.Row="1">
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="*"/>
+												<ColumnDefinition Width="Auto"/>
+											</Grid.ColumnDefinitions>
+
+											<!-- Çoklu seçime izin veren ListBox -->
+											<ListBox x:Name="LoListBox" Grid.Column="0" ItemsSource="{Binding AvailableLearningOutcomes}" SelectionMode="Extended" Padding="6" MinHeight="120">
+												<ListBox.ItemTemplate>
+													<DataTemplate>
+														<CheckBox Checked="LoCheckBox_Checked" Unchecked="LoCheckBox_Unchecked" Padding="6">
+															<CheckBox.IsChecked>
+																<MultiBinding Converter="{StaticResource ContainsLoConverter}" Mode="OneWay">
+																	<Binding Path="DataContext.SelectedLearningOutcomes" ElementName="LoListBox" />
+																	<Binding />
+																</MultiBinding>
+															</CheckBox.IsChecked>
+															<CheckBox.Content>
+																<StackPanel>
+																	<TextBlock FontWeight="Bold" Text="{Binding Code}"/>
+																	<TextBlock Text="{Binding Name}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
+																</StackPanel>
+															</CheckBox.Content>
+														</CheckBox>
+													</DataTemplate>
+												</ListBox.ItemTemplate>
+											</ListBox>
+
+											<StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Top" Margin="8,0,0,0">
+												<Button Content="+ Ekle" Click="AddSelectedLearningOutcomes_Click" Tag="{Binding ElementName=LoListBox}" Background="{StaticResource SuccessBrush}" Foreground="White" Padding="12,6" BorderThickness="0" Cursor="Hand"/>
+												<Button Content="Seçiliyi Kaldır" Click="RemoveSelectedLearningOutcomes_Click" Tag="{Binding ElementName=LoListBox}" Background="Transparent" Foreground="{StaticResource DangerBrush}" BorderBrush="{StaticResource DangerBrush}" BorderThickness="1" Padding="8,4" Margin="0,8,0,0" Cursor="Hand"/>
+											</StackPanel>
+										</Grid>
 									</Grid>
 
-									<ItemsControl ItemsSource="{Binding SelectedTopics}">
+									<ItemsControl ItemsSource="{Binding SelectedLearningOutcomes}">
 										<ItemsControl.ItemsPanel>
 											<ItemsPanelTemplate>
 												<WrapPanel/>
@@ -481,13 +495,12 @@
 													<StackPanel Orientation="Horizontal">
 														<TextBlock Foreground="#1E3A8A" FontSize="12"
                                                                    VerticalAlignment="Center">
-															<Run Text="H"/>
-															<Run Text="{Binding WeekNumber}"/>
+															<Run Text="{Binding Code}"/>
 															<Run Text=" — "/>
-															<Run Text="{Binding Title}"/>
+															<Run Text="{Binding Name}"/>
 														</TextBlock>
 														<Button Content="×"
-                                                                Command="{Binding DataContext.RemoveTopicCommand,
+                                                                Command="{Binding DataContext.RemoveLearningOutcomeCommand,
                                                                           RelativeSource={RelativeSource AncestorType=Border, AncestorLevel=2}}"
                                                                 CommandParameter="{Binding}"
                                                                 Background="Transparent"

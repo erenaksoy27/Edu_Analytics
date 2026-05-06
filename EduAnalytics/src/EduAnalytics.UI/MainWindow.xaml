@@ -42,6 +42,15 @@
         <DataTemplate DataType="{x:Type vm:SingleQuestionCreateViewModel}">
             <views:SingleQuestionCreateView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProgramOutcomeMappingViewModel}">
+            <views:ProgramOutcomeMappingView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:StudentManagementViewModel}">
+            <views:StudentManagementView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AcademicStructureViewModel}">
+            <views:AcademicStructureView/>
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -85,6 +94,16 @@
                         </StackPanel>
                     </Button>
 
+                    <Button Tag="AcademicStructure"
+                            Command="{Binding NavigateToAcademicStructureCommand}"
+                            Style="{StaticResource SidebarButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🏛" Width="22" FontSize="13"
+                                       VerticalAlignment="Center" TextAlignment="Center"/>
+                            <TextBlock Text="Akademik Yapı" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
                     <!-- SORU YÖNETİMİ -->
                     <TextBlock Text="SORU YÖNETİMİ" Style="{StaticResource SidebarSectionTitleStyle}"/>
 
@@ -95,16 +114,6 @@
                             <TextBlock Text="📚" Width="22" FontSize="13"
                                        VerticalAlignment="Center" TextAlignment="Center"/>
                             <TextBlock Text="Soru Bankası" Margin="10,0,0,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button Tag="CommonStem"
-                            Command="{Binding NavigateToCommonStemCommand}"
-                            Style="{StaticResource SidebarButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🔗" Width="22" FontSize="13"
-                                       VerticalAlignment="Center" TextAlignment="Center"/>
-                            <TextBlock Text="İlişkili Soru" Margin="10,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -151,6 +160,16 @@
                         </StackPanel>
                     </Button>
 
+                    <Button Tag="ProgramOutcomeMapping"
+                            Command="{Binding NavigateToProgramOutcomeMappingCommand}"
+                            Style="{StaticResource SidebarButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔗" Width="22" FontSize="13"
+                                       VerticalAlignment="Center" TextAlignment="Center"/>
+                            <TextBlock Text="PÇ ↔ ÖÇ Eşleştirme" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
                     <Button Tag="ProgramOutcomeReport"
                             Command="{Binding NavigateToProgramOutcomeReportCommand}"
                             Style="{StaticResource SidebarButtonStyle}">
@@ -158,6 +177,19 @@
                             <TextBlock Text="📈" Width="22" FontSize="13"
                                        VerticalAlignment="Center" TextAlignment="Center"/>
                             <TextBlock Text="PÇ Başarı Raporu" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- ÖĞRENCİ YÖNETİMİ -->
+                    <TextBlock Text="ÖĞRENCİ YÖNETİMİ" Style="{StaticResource SidebarSectionTitleStyle}"/>
+
+                    <Button Tag="Students"
+                            Command="{Binding NavigateToStudentsCommand}"
+                            Style="{StaticResource SidebarButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="👥" Width="22" FontSize="13"
+                                       VerticalAlignment="Center" TextAlignment="Center"/>
+                            <TextBlock Text="Öğrenciler" Margin="10,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 

@@ -5,6 +5,7 @@ using EduAnalytics.Business.Dtos;
 using EduAnalytics.Business.Services.Interfaces;
 using EduAnalytics.Core.Entities;
 using EduAnalytics.Core.Enums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EduAnalytics.UI.ViewModels;
 
@@ -17,6 +18,9 @@ public partial class ExamCreateViewModel : ObservableObject
 
     [ObservableProperty] private ObservableCollection<Course> _courses = new();
     [ObservableProperty] private ObservableCollection<Topic> _availableTopics = new();
+    
+    // Add available learning outcomes property at the exam level
+    [ObservableProperty] private ObservableCollection<LearningOutcomeDto> _availableLearningOutcomes = new();
 
     [ObservableProperty]
     private Course? _selectedCourse;
@@ -157,7 +161,38 @@ public partial class ExamCreateViewModel : ObservableObject
 
     partial void OnSelectedCourseChanged(Course? value)
     {
-        _ = ReloadTopicsAsync();
+        _ = ReloadLearningOutcomesAsync();
+    }
+
+    private async Task ReloadLearningOutcomesAsync()
+    {
+        if (SelectedCourse == null)
+        {
+            return;
+        }
+
+        await _opLock.WaitAsync();
+        try
+        {
+            if (App.Services.GetService<ILearningOutcomeService>() is ILearningOutcomeService service)
+            {
+                var outcomes = await service.GetByCourseAsync(SelectedCourse.Id);
+                AvailableLearningOutcomes = new ObservableCollection<LearningOutcomeDto>(outcomes);
+                foreach (var q in Questions)
+                {
+                    q.AvailableLearningOutcomes.Clear();
+                    foreach (var lo in outcomes) q.AvailableLearningOutcomes.Add(lo);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Öğrenim çıktıları yüklenemedi: {ex.Message}";
+        }
+        finally
+        {
+            _opLock.Release();
+        }
     }
 
     private async Task ReloadTopicsAsync()
@@ -198,6 +233,9 @@ public partial class ExamCreateViewModel : ObservableObject
             QuestionNumber = Questions.Count + 1
         };
         foreach (var t in AvailableTopics) q.AvailableTopics.Add(t);
+        
+        foreach (var lo in AvailableLearningOutcomes) q.AvailableLearningOutcomes.Add(lo);
+
         Questions.Add(q);
     }
 
@@ -273,6 +311,7 @@ public partial class ExamCreateViewModel : ObservableObject
             ErrorMessage = "Sınav başlığı boş olamaz.";
             return;
         }
+        
         if (Questions.Count == 0)
         {
             ErrorMessage = "En az bir soru eklemelisiniz.";

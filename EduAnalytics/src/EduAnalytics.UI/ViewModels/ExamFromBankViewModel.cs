@@ -45,6 +45,13 @@ public partial class ExamFromBankViewModel : ObservableObject
     // Denge önizlemesi
     [ObservableProperty] private ExamBalanceReportDto? _balancePreview;
 
+    // ── ÖĞRENCİ FİLTRESİ — ÇOKLU SINIF / BÖLÜM ──
+    [ObservableProperty] private ObservableCollection<StudentSelectionViewModel> _allStudents = new();
+    [ObservableProperty] private ObservableCollection<StudentSelectionViewModel> _filteredStudents = new();
+
+    /// <summary>Sınıf adlarını CheckBox ile çoklu seçim olarak gösteren liste.</summary>
+    [ObservableProperty] private ObservableCollection<ClassFilterItem> _classFilters = new();
+
     [ObservableProperty] private bool _isSaving;
     [ObservableProperty] private string? _errorMessage;
     [ObservableProperty] private string? _successMessage;
@@ -65,17 +72,97 @@ public partial class ExamFromBankViewModel : ObservableObject
     {
         ErrorMessage = null;
         SuccessMessage = null;
+
+        DetachClassFilterHandlers();
+
         try
         {
             var courses = await _examService.GetCoursesAsync();
             Courses = new ObservableCollection<Course>(courses);
             if (SelectedCourse == null && courses.Count > 0)
                 SelectedCourse = courses[0];
+
+            var students = await _examService.GetStudentsAsync();
+            var studentVms = students.Select(s => new StudentSelectionViewModel
+            {
+                Id = s.Id,
+                StudentNumber = s.StudentNumber,
+                FullName = s.FullName,
+                ClassName = s.ClassName,
+                IsSelected = false
+            }).ToList();
+
+            AllStudents = new ObservableCollection<StudentSelectionViewModel>(studentVms);
+
+            // Sınıf filtresi (çoklu seçim için her bölüm/sınıf bir CheckBox)
+            var classes = students.Select(s => s.ClassName).Distinct().OrderBy(c => c).ToList();
+            var filterItems = classes.Select(c => new ClassFilterItem { ClassName = c, IsSelected = false }).ToList();
+
+            foreach (var item in filterItems)
+                item.PropertyChanged += OnClassFilterChanged;
+
+            ClassFilters = new ObservableCollection<ClassFilterItem>(filterItems);
+            ApplyClassFilter();
         }
         catch (Exception ex)
         {
             ErrorMessage = $"Yükleme hatası: {ex.Message}";
         }
+    }
+
+    private void DetachClassFilterHandlers()
+    {
+        if (ClassFilters == null) return;
+        foreach (var item in ClassFilters)
+            item.PropertyChanged -= OnClassFilterChanged;
+    }
+
+    private void OnClassFilterChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ClassFilterItem.IsSelected))
+            ApplyClassFilter();
+    }
+
+    private void ApplyClassFilter()
+    {
+        var selectedClasses = ClassFilters.Where(c => c.IsSelected).Select(c => c.ClassName).ToHashSet();
+
+        if (selectedClasses.Count == 0)
+        {
+            // Hiç filtre seçilmemişse tüm öğrenciler görünür
+            FilteredStudents = new ObservableCollection<StudentSelectionViewModel>(AllStudents);
+        }
+        else
+        {
+            FilteredStudents = new ObservableCollection<StudentSelectionViewModel>(
+                AllStudents.Where(s => selectedClasses.Contains(s.ClassName)));
+        }
+    }
+
+    [RelayCommand]
+    private void SelectAllClasses()
+    {
+        foreach (var item in ClassFilters) item.IsSelected = true;
+    }
+
+    [RelayCommand]
+    private void ClearClassFilter()
+    {
+        foreach (var item in ClassFilters) item.IsSelected = false;
+    }
+
+    [RelayCommand]
+    private void SelectAllFiltered()
+    {
+        foreach (var student in FilteredStudents)
+            student.IsSelected = true;
+    }
+
+    [RelayCommand]
+    private void DeselectAllFiltered()
+    {
+        foreach (var student in FilteredStudents)
+            student.IsSelected = false;
     }
 
     partial void OnSelectedCourseChanged(Course? value)
@@ -211,6 +298,16 @@ public partial class ExamFromBankViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(Title)) { ErrorMessage = "Sınav başlığı boş olamaz."; return; }
         if (SelectedQuestions.Count == 0) { ErrorMessage = "En az bir soru seçilmeli."; return; }
 
+        var studentModels = AllStudents
+            .Where(s => s.IsSelected)
+            .Select(s => new StudentCreateModel
+            {
+                StudentNumber = s.StudentNumber,
+                FullName = s.FullName,
+                ClassName = s.ClassName
+            })
+            .ToList();
+
         IsSaving = true;
         try
         {
@@ -225,6 +322,7 @@ public partial class ExamFromBankViewModel : ObservableObject
                 BookletCount = BookletCount,
                 ShuffleOptions = ShuffleOptions,
                 CreatedByUserId = userId,
+                Students = studentModels,
                 SelectedQuestions = SelectedQuestions
                     .Select((q, i) => new ExamBankQuestionRef
                     {
@@ -241,6 +339,10 @@ public partial class ExamFromBankViewModel : ObservableObject
             Title = string.Empty;
             SelectedQuestions.Clear();
             BalancePreview = null;
+            
+            foreach (var s in AllStudents) s.IsSelected = false;
+            foreach (var c in ClassFilters) c.IsSelected = false;
+
             await ReloadPoolAsync();
 
             ExamSaved?.Invoke();

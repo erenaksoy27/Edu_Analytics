@@ -72,6 +72,8 @@ public partial class App : Application
         services.AddTransient<IExamBookletService, ExamBookletService>();
         services.AddTransient<IExamBalanceCheckService, ExamBalanceCheckService>();
         services.AddTransient<IExamCancellationService, ExamCancellationService>();
+        services.AddTransient<IStudentService, StudentService>();
+        services.AddTransient<IAcademicStructureService, AcademicStructureService>();
 
         // ViewModels
         services.AddTransient<MainViewModel>();
@@ -85,6 +87,9 @@ public partial class App : Application
         services.AddTransient<LearningOutcomeManagementViewModel>();
         services.AddTransient<ProgramOutcomeManagementViewModel>();
         services.AddTransient<ProgramOutcomeReportViewModel>();
+        services.AddTransient<ProgramOutcomeMappingViewModel>();
+        services.AddTransient<StudentManagementViewModel>();
+        services.AddTransient<AcademicStructureViewModel>();
 
         // FAZ 4 — İleri özellikler
         services.AddTransient<QuestionGroupEditorViewModel>();

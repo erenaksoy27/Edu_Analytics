@@ -24,4 +24,15 @@ public interface IProgramOutcomeService
 
     Task LinkToLearningOutcomeAsync(int programOutcomeId, int learningOutcomeId, int contributionLevel);
     Task UnlinkFromLearningOutcomeAsync(int programOutcomeId, int learningOutcomeId);
+
+    /// <summary>
+    /// Belirtilen programa bağlı tüm derslerin tüm ÖÇ'lerini düz liste olarak döner.
+    /// PÇ-ÖÇ eşleştirme ekranında "bağlanabilecek ÖÇ'ler" listesi için kullanılır.
+    /// </summary>
+    Task<List<LearningOutcomeDto>> GetAllLearningOutcomesInProgramAsync(int programId);
+
+    /// <summary>
+    /// Bir PÇ'ye eşleştirilmiş ÖÇ'leri (katkı seviyesi ile birlikte) döner.
+    /// </summary>
+    Task<List<MappedLearningOutcomeDto>> GetMappedLearningOutcomesAsync(int programOutcomeId);
 }

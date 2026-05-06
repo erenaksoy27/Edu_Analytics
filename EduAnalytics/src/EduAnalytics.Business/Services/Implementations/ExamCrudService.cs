@@ -108,11 +108,17 @@ public class ExamCrudService : IExamCrudService
                 IsCancelled = false
             });
 
-            foreach (var topicId in qm.TopicIds.Distinct())
-                _context.QuestionTopics.Add(new QuestionTopic { QuestionId = q.Id, TopicId = topicId });
+            if (qm.TopicIds != null)
+            {
+                foreach (var topicId in qm.TopicIds.Distinct())
+                    _context.QuestionTopics.Add(new QuestionTopic { QuestionId = q.Id, TopicId = topicId });
+            }
 
-            foreach (var loId in qm.LearningOutcomeIds.Distinct())
-                _context.QuestionLearningOutcomes.Add(new QuestionLearningOutcome { QuestionId = q.Id, LearningOutcomeId = loId });
+            if (qm.LearningOutcomeIds != null)
+            {
+                foreach (var loId in qm.LearningOutcomeIds.Distinct())
+                    _context.QuestionLearningOutcomes.Add(new QuestionLearningOutcome { QuestionId = q.Id, LearningOutcomeId = loId });
+            }
         }
         _context.ExamQuestions.AddRange(examQuestions);
         await _context.SaveChangesAsync();

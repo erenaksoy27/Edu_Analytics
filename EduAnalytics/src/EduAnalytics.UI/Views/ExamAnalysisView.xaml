@@ -356,34 +356,62 @@
                                   AutoGenerateColumns="False"
                                   IsReadOnly="True"
                                   GridLinesVisibility="Horizontal"
-                                  RowHeight="36"
+                                  HeadersVisibility="Column"
+                                  RowHeight="56"
+                                  ColumnHeaderHeight="40"
                                   HorizontalGridLinesBrush="{StaticResource BorderBrush}"
                                   Background="Transparent"
                                   BorderThickness="0">
+                            <DataGrid.Resources>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="Padding" Value="10,8"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Padding" Value="10,6"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                </Style>
+                            </DataGrid.Resources>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Soru No" Binding="{Binding QuestionNumber}" Width="70"/>
-                                <DataGridTextColumn Header="Soru Metni" Binding="{Binding QuestionText}" Width="*"/>
-                                <DataGridTextColumn Header="Türü" Binding="{Binding QuestionType}" Width="100"/>
-                                <DataGridTextColumn Header="Puanı" Binding="{Binding MaxPoints, StringFormat=N1}" Width="60"/>
-                                <DataGridTextColumn Header="Cevabı" Binding="{Binding CorrectOption}" Width="60"/>
-                                <DataGridTemplateColumn Header="İşlem" Width="100">
+                                <DataGridTextColumn Header="Soru No" Binding="{Binding QuestionNumber}" Width="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="Soru Metni" Width="*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Button Content="🚫 İptal"
-                                                    Command="{Binding DataContext.CancelQuestionCommand,
-                                                              RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    Background="Transparent"
-                                                    Foreground="{StaticResource DangerBrush}"
-                                                    BorderBrush="{StaticResource DangerBrush}"
-                                                    BorderThickness="1"
-                                                    Padding="8,2"
-                                                    FontSize="11"
-                                                    Cursor="Hand"
-                                                    Margin="2"/>
+                                            <TextBlock Text="{Binding QuestionText}"
+                                                       TextWrapping="Wrap"
+                                                       VerticalAlignment="Center"
+                                                       Padding="0,4"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Türü" Binding="{Binding QuestionType}" Width="120"/>
+                                <DataGridTextColumn Header="Puanı" Binding="{Binding MaxPoints, StringFormat=N1}" Width="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Cevabı" Binding="{Binding CorrectOption}" Width="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Border>
@@ -521,11 +549,54 @@
                     </StackPanel>
 
                     <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0">
-                        <DataGrid ItemsSource="{Binding FilteredStudents}" AutoGenerateColumns="False" 
+                        <DataGrid ItemsSource="{Binding FilteredStudents}" AutoGenerateColumns="False"
                                   IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column"
-                                  BorderThickness="1" BorderBrush="{DynamicResource BorderMuted}" Background="White" RowHeight="35">
+                                  BorderThickness="1" BorderBrush="{DynamicResource BorderMuted}" Background="White"
+                                  RowHeight="48" ColumnHeaderHeight="42">
+                            <DataGrid.Resources>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="Padding" Value="8,6"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Padding" Value="10,8"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                </Style>
+                            </DataGrid.Resources>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Sıra" Binding="{Binding ClassRank}" Width="50">
+                                <DataGridTextColumn Header="Sıra" Binding="{Binding ClassRank}" Width="60">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Öğrenci No" Binding="{Binding StudentNumber}" Width="110"/>
+                                <DataGridTextColumn Header="Sınıf / Bölüm" Binding="{Binding ClassName}" Width="180"/>
+                                <DataGridTextColumn Header="Ad Soyad" Binding="{Binding FullName}" Width="*" MinWidth="200"/>
+                                <DataGridTextColumn Header="Doğru" Binding="{Binding CorrectAnswers}" Width="70">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Yanlış" Binding="{Binding WrongAnswers}" Width="70">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Boş" Binding="{Binding EmptyAnswers}" Width="60">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -533,35 +604,16 @@
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Header="Öğrenci No" Binding="{Binding StudentNumber}" Width="100"/>
-                                <DataGridTextColumn Header="Sınıf/Bölüm" Binding="{Binding ClassName}" Width="150" />
-                                <DataGridTextColumn Header="Ad Soyad" Binding="{Binding FullName}" Width="*"/>
-                                <DataGridTextColumn Header="Doğru" Binding="{Binding CorrectAnswers}" Width="60">
+                                <DataGridTextColumn Header="Başarı %" Binding="{Binding SuccessRate, StringFormat=N1}" Width="110">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="HorizontalAlignment" Value="Center"/>
                                             <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Header="Yanlış" Binding="{Binding WrongAnswers}" Width="60">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                                            <Setter Property="VerticalAlignment" Value="Center"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="Boş" Binding="{Binding EmptyAnswers}" Width="50">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                                            <Setter Property="VerticalAlignment" Value="Center"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="Başarı %" Binding="{Binding SuccessRate, StringFormat=N1}" Width="100"/>
-                                <DataGridTemplateColumn Header="Zayıf Konular" Width="*">
+                                <DataGridTemplateColumn Header="Zayıf Konular" Width="2*" MinWidth="200">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <ItemsControl ItemsSource="{Binding WeakTopics}" VerticalAlignment="Center">

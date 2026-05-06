@@ -51,3 +51,15 @@ public class ProgramOutcomeCreateModel
     public string Code { get; set; } = null!;
     public string Description { get; set; } = null!;
 }
+
+/// <summary>
+/// PÇ-ÖÇ eşleştirme ekranı için, bir PÇ'ye bağlı ÖÇ'nün özet bilgileri + katkı seviyesi.
+/// </summary>
+public class MappedLearningOutcomeDto
+{
+    public int LearningOutcomeId { get; set; }
+    public string Code { get; set; } = null!;
+    public string Name { get; set; } = null!;
+    public string CourseName { get; set; } = null!;
+    public int ContributionLevel { get; set; }
+}
