@@ -28,4 +28,16 @@ public interface IExamCrudService
     /// İleride login sistemi eklendiğinde oturumdaki kullanıcıdan alınacak.
     /// </summary>
     Task<int> GetDefaultUserIdAsync();
+
+    /// <summary>Tüm sınavları yönetim ekranı için özet kart bilgisiyle döner.</summary>
+    Task<List<ExamListItemDto>> GetAllExamsAsync();
+
+    /// <summary>Tek bir sınavın temel alanlarını düzenleme formu için döner.</summary>
+    Task<ExamUpdateModel?> GetExamForEditAsync(int examId);
+
+    /// <summary>Sınavın başlık, tarih, süre ve tip alanlarını günceller.</summary>
+    Task UpdateExamAsync(ExamUpdateModel model);
+
+    /// <summary>Sınavı ve ilişkili alt kayıtları cascade ile siler.</summary>
+    Task DeleteExamAsync(int examId);
 }

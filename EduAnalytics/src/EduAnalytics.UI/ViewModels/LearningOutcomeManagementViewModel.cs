@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Business.Dtos;
 using EduAnalytics.Business.Services.Interfaces;
 using EduAnalytics.Core.Entities;
+using Microsoft.Win32;
 
 namespace EduAnalytics.UI.ViewModels;
 
@@ -21,8 +23,8 @@ public partial class LearningOutcomeManagementViewModel : ObservableObject
     [ObservableProperty] private Course? _selectedCourse;
     [ObservableProperty] private ObservableCollection<LearningOutcomeDto> _learningOutcomes = new();
 
-    // Form alanları (kod artık otomatik üretilir, kullanıcıya gösterilmez)
-    [ObservableProperty] private string _formName = string.Empty;
+    // Form alanları
+    [ObservableProperty] private string _formCode = string.Empty;
     [ObservableProperty] private string _formDescription = string.Empty;
     [ObservableProperty] private LearningOutcomeDto? _editingOutcome;
 
@@ -99,7 +101,7 @@ public partial class LearningOutcomeManagementViewModel : ObservableObject
         if (lo == null) return;
         EditingOutcome = lo;
         EditingCodeInfo = lo.Code;
-        FormName = lo.Name;
+        FormCode = lo.Code;
         FormDescription = lo.Description ?? string.Empty;
     }
 
@@ -108,7 +110,7 @@ public partial class LearningOutcomeManagementViewModel : ObservableObject
     {
         EditingOutcome = null;
         EditingCodeInfo = string.Empty;
-        FormName = string.Empty;
+        FormCode = string.Empty;
         FormDescription = string.Empty;
     }
 
@@ -120,23 +122,27 @@ public partial class LearningOutcomeManagementViewModel : ObservableObject
             ErrorMessage = "Önce ders seçin.";
             return;
         }
-        if (string.IsNullOrWhiteSpace(FormName))
+        if (string.IsNullOrWhiteSpace(FormCode) || string.IsNullOrWhiteSpace(FormDescription))
         {
-            ErrorMessage = "ÖÇ adı zorunludur.";
+            ErrorMessage = "Kod ve açıklama zorunludur.";
             return;
         }
 
         await _opLock.WaitAsync();
         try
         {
-            // Düzenleme mi yeni mi? Düzenlemede mevcut kod korunur, yenide otomatik üretilir.
-            string code = EditingOutcome?.Code ?? GenerateNextCode();
+            string code = NormalizeLearningOutcomeCode(FormCode);
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                ErrorMessage = "Kod alanına 1, 2, 3 gibi bir sıra numarası yazın.";
+                return;
+            }
 
             var model = new LearningOutcomeCreateModel
             {
                 CourseId = SelectedCourse.Id,
                 Code = code,
-                Name = FormName.Trim(),
+                Name = FormDescription.Trim(),
                 Description = string.IsNullOrWhiteSpace(FormDescription) ? null : FormDescription.Trim()
             };
 
@@ -164,25 +170,153 @@ public partial class LearningOutcomeManagementViewModel : ObservableObject
         await ReloadOutcomesAsync();
     }
 
-    /// <summary>
-    /// Mevcut ÖÇ kodlarına bakarak boş olan en küçük "ÖÇ-N" numarasını üretir.
-    /// Örn. ÖÇ-1, ÖÇ-2, ÖÇ-3 varsa → ÖÇ-4. ÖÇ-2 silinmişse → ÖÇ-2.
-    /// </summary>
-    private string GenerateNextCode()
+    private static string NormalizeLearningOutcomeCode(string rawCode)
     {
-        var existingNumbers = LearningOutcomes
-            .Select(lo => lo.Code)
-            .Select(c =>
-            {
-                var m = Regex.Match(c, @"\d+");
-                return m.Success ? int.Parse(m.Value) : -1;
-            })
-            .Where(n => n > 0)
-            .ToHashSet();
+        var value = rawCode.Trim();
+        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
 
+        var match = Regex.Match(value, @"\d+");
+        return match.Success ? $"ÖÇ-{int.Parse(match.Value)}" : string.Empty;
+    }
+
+    private static string GenerateNextCode(HashSet<int> usedNumbers)
+    {
         int n = 1;
-        while (existingNumbers.Contains(n)) n++;
+        while (usedNumbers.Contains(n)) n++;
+        usedNumbers.Add(n);
         return $"ÖÇ-{n}";
+    }
+
+    private static int ExtractCodeNumber(string code)
+    {
+        var match = Regex.Match(code, @"\d+");
+        return match.Success ? int.Parse(match.Value) : -1;
+    }
+
+    [RelayCommand]
+    private void DownloadExcelTemplate()
+    {
+        var sfd = new SaveFileDialog
+        {
+            Filter = "Excel Dosyası|*.xlsx",
+            Title = "Öğrenim Çıktısı Şablonu İndir",
+            FileName = "ogrenim_ciktilari_sablon.xlsx"
+        };
+
+        if (sfd.ShowDialog() != true) return;
+
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("Öğrenim Çıktıları");
+        ws.Cell(1, 1).Value = "Kod";
+        ws.Cell(1, 2).Value = "Açıklama";
+        ws.Cell(2, 1).Value = "1";
+        ws.Cell(2, 2).Value = "Öğrencinin bu ders sonunda kazanması beklenen bilgi, beceri veya yetkinliği açık ve ölçülebilir bir cümleyle yazın.";
+        ws.Range(1, 1, 1, 2).Style.Font.Bold = true;
+        ws.Columns().AdjustToContents();
+        workbook.SaveAs(sfd.FileName);
+
+        SuccessMessage = "Öğrenim çıktısı Excel şablonu indirildi.";
+        ErrorMessage = null;
+    }
+
+    [RelayCommand]
+    private async Task ImportExcelAsync()
+    {
+        if (SelectedCourse == null)
+        {
+            ErrorMessage = "Önce ders seçin.";
+            return;
+        }
+
+        var ofd = new OpenFileDialog
+        {
+            Filter = "Excel Dosyası|*.xlsx;*.xls",
+            Title = "Öğrenim Çıktıları Excel Dosyası Seç"
+        };
+
+        if (ofd.ShowDialog() != true) return;
+
+        await _opLock.WaitAsync();
+        try
+        {
+            using var workbook = new XLWorkbook(ofd.FileName);
+            var ws = workbook.Worksheets.First();
+            var lastRow = ws.LastRowUsed()?.RowNumber() ?? 1;
+
+            var existingByCode = LearningOutcomes.ToDictionary(lo => lo.Code.Trim(), StringComparer.OrdinalIgnoreCase);
+            var usedNumbers = LearningOutcomes
+                .Select(lo => ExtractCodeNumber(lo.Code))
+                .Where(n => n > 0)
+                .ToHashSet();
+
+            int inserted = 0;
+            int updated = 0;
+            int skipped = 0;
+
+            for (int row = 2; row <= lastRow; row++)
+            {
+                var rawCode = ws.Cell(row, 1).GetString().Trim();
+                var description = ws.Cell(row, 2).GetString().Trim();
+
+                if (string.IsNullOrWhiteSpace(description))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var code = NormalizeLearningOutcomeCode(rawCode);
+                if (string.IsNullOrWhiteSpace(code))
+                    code = GenerateNextCode(usedNumbers);
+                else
+                {
+                    var number = ExtractCodeNumber(code);
+                    if (number > 0) usedNumbers.Add(number);
+                }
+
+                var model = new LearningOutcomeCreateModel
+                {
+                    CourseId = SelectedCourse.Id,
+                    Code = code,
+                    Name = description,
+                    Description = description
+                };
+
+                if (existingByCode.TryGetValue(code, out var existing))
+                {
+                    await _loService.UpdateAsync(existing.Id, model);
+                    updated++;
+                }
+                else
+                {
+                    var id = await _loService.CreateAsync(model);
+                    existingByCode[code] = new LearningOutcomeDto
+                    {
+                        Id = id,
+                        CourseId = SelectedCourse.Id,
+                        Code = code,
+                        Name = description,
+                        Description = model.Description
+                    };
+                    inserted++;
+                }
+            }
+
+            SuccessMessage = $"Excel içe aktarıldı: {inserted} eklendi, {updated} güncellendi" +
+                             (skipped > 0 ? $", {skipped} satır atlandı." : ".");
+            ErrorMessage = null;
+            StartNew();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Excel içe aktarma hatası: {ex.Message}";
+            SuccessMessage = null;
+        }
+        finally
+        {
+            _opLock.Release();
+        }
+
+        await ReloadOutcomesAsync();
     }
 
     [RelayCommand]

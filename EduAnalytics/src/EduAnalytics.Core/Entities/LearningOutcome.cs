@@ -1,7 +1,7 @@
 namespace EduAnalytics.Core.Entities;
 
 /// <summary>
-/// Ders Çıktısı (ÖÇ). Her ÖÇ tek bir derse aittir (CourseId zorunlu).
+/// Öğrenim Çıktısı (ÖÇ). Her ÖÇ tek bir derse aittir (CourseId zorunlu).
 /// Hiyerarşi: ProgramOutcome → LearningOutcome → Topic / Question.
 /// </summary>
 public class LearningOutcome

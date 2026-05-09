@@ -81,7 +81,8 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
             {
                 var los = await loService.GetByCourseAsync(SelectedCourse.Id);
                 Question.AvailableLearningOutcomes.Clear();
-                foreach (var lo in los) Question.AvailableLearningOutcomes.Add(lo);
+                foreach (var lo in los)
+                    Question.AvailableLearningOutcomes.Add(new SelectableLearningOutcome(lo, Question.SelectedLearningOutcomes));
             }
         }
         catch { }

@@ -9,8 +9,30 @@
              mc:Ignorable="d"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
 
-    <!-- Wrap the entire page content in a ScrollViewer so it can scroll when window is small -->
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0">
+    <UserControl.Resources>
+        <Style x:Key="ChipStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="Background" Value="{StaticResource PageBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderSubtleBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="ChipTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        </Style>
+
+        <Style x:Key="MiniButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -20,17 +42,18 @@
             </Grid.RowDefinitions>
 
             <!-- Başlık -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,12">
-                <TextBlock Text="📚 Soru Bankasından Sınav Oluştur" Style="{StaticResource HeadingStyle}"/>
+            <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                <TextBlock Text="Soru Bankasından Sınav Oluştur" Style="{StaticResource HeadingStyle}"/>
                 <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}">
-                    Yeni soru üretmek yerine soru bankasındaki aktif soruları seçerek hızlıca sınav kurun.
-                    Vize tipinde sadece tarihe kadar olan ÖÇ'ler kullanılabilir.
+                    Yeni soru üretmek yerine soru bankasındaki aktif soruları seçerek hızlıca sınav kurun. Vize tipinde sadece tarihe kadar olan ÖÇ'ler kullanılabilir.
                 </TextBlock>
             </StackPanel>
 
             <!-- Sınav bilgi paneli -->
             <Border Grid.Row="1" Style="{StaticResource CardStyle}">
                 <StackPanel>
+                    <TextBlock Text="Sınav Bilgileri" Style="{StaticResource SubheadingStyle}"/>
+
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -38,138 +61,60 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="14"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="14"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="12"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="14"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="14"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Satır 1 -->
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Ders" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Sınav Başlığı" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <TextBlock Grid.Row="0" Grid.Column="4" Text="Tarih" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <TextBlock Grid.Row="0" Grid.Column="6" Text="Süre (dk)" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Ders" Style="{StaticResource LabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Sınav Başlığı" Style="{StaticResource LabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="4" Text="Tarih" Style="{StaticResource LabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="6" Text="Süre (dk)" Style="{StaticResource LabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="8" Text="Tip" Style="{StaticResource LabelStyle}"/>
 
                         <ComboBox Grid.Row="1" Grid.Column="0"
-                                  ItemsSource="{Binding Courses}" SelectedItem="{Binding SelectedCourse}"
-                                  DisplayMemberPath="Name" Padding="8,6"/>
+                                  ItemsSource="{Binding Courses}"
+                                  SelectedItem="{Binding SelectedCourse}"
+                                  DisplayMemberPath="Name"/>
                         <TextBox Grid.Row="1" Grid.Column="2"
-                                 Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                                 Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
                         <DatePicker Grid.Row="1" Grid.Column="4"
-                                    SelectedDate="{Binding ExamDate}" Padding="8,4"/>
+                                    SelectedDate="{Binding ExamDate}"/>
                         <TextBox Grid.Row="1" Grid.Column="6"
                                  Text="{Binding DurationMinutes, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="8,6" Width="70"/>
-
-                        <StackPanel Grid.Row="1" Grid.Column="8" Orientation="Horizontal">
-                            <TextBlock Text="Tip:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,4,0"/>
-                            <ComboBox SelectedItem="{Binding ExamType}" Padding="8,6" Width="110">
-                                <ComboBox.Items>
-                                    <x:Static Member="enums:ExamType.Quiz"/>
-                                    <x:Static Member="enums:ExamType.Midterm"/>
-                                    <x:Static Member="enums:ExamType.Final"/>
-                                    <x:Static Member="enums:ExamType.MakeUp"/>
-                                </ComboBox.Items>
-                            </ComboBox>
-                        </StackPanel>
+                                 Width="80"/>
+                        <ComboBox Grid.Row="1" Grid.Column="8"
+                                  SelectedItem="{Binding ExamType}" Width="120">
+                            <ComboBox.Items>
+                                <x:Static Member="enums:ExamType.Quiz"/>
+                                <x:Static Member="enums:ExamType.Midterm"/>
+                                <x:Static Member="enums:ExamType.Final"/>
+                                <x:Static Member="enums:ExamType.MakeUp"/>
+                            </ComboBox.Items>
+                        </ComboBox>
                     </Grid>
 
-				<Border Style="{StaticResource CardStyle}" Margin="0,16,0,0">
-					<StackPanel>
-						<TextBlock Text="Sınava Girecek Öğrencileri Seçin" Style="{StaticResource SubheadingStyle}"/>
-						<TextBlock Text="ℹ Birden fazla bölüm/sınıf seçebilirsiniz (alttan alan / yükseltme / ortak ders öğrencileri)."
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontSize="11" Margin="0,0,0,8"/>
-
-						<!-- ÇOKLU SINIF/BÖLÜM FİLTRESİ (CheckBox listesi) -->
-						<TextBlock Text="Sınıf/Bölüm Filtresi (çoklu seçim)" FontWeight="SemiBold" Margin="0,4,0,4"/>
-						<Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6"
-                                MaxHeight="100" Background="#F9FAFB" Margin="0,0,0,8">
-							<ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
-								<ItemsControl ItemsSource="{Binding ClassFilters}">
-									<ItemsControl.ItemsPanel>
-										<ItemsPanelTemplate>
-											<WrapPanel/>
-										</ItemsPanelTemplate>
-									</ItemsControl.ItemsPanel>
-									<ItemsControl.ItemTemplate>
-										<DataTemplate>
-											<CheckBox Content="{Binding ClassName}"
-                                                      IsChecked="{Binding IsSelected}"
-                                                      Margin="6,4" Padding="4,0"
-                                                      Cursor="Hand"/>
-										</DataTemplate>
-									</ItemsControl.ItemTemplate>
-								</ItemsControl>
-							</ScrollViewer>
-						</Border>
-
-						<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-							<Button Content="✓ Tüm Sınıfları Seç"
-                                    Command="{Binding SelectAllClassesCommand}"
-                                    Padding="10,4" Margin="0,0,8,0"
-                                    Background="#E0E7FF" Foreground="#3730A3"
-                                    BorderThickness="0" Cursor="Hand" FontSize="11"/>
-							<Button Content="✕ Sınıf Filtresini Temizle"
-                                    Command="{Binding ClearClassFilterCommand}"
-                                    Padding="10,4" Margin="0,0,16,0"
-                                    Background="#FEE2E2" Foreground="#991B1B"
-                                    BorderThickness="0" Cursor="Hand" FontSize="11"/>
-
-							<Button Content="✓ Filtredeki Tüm Öğrencileri Seç"
-                                    Command="{Binding SelectAllFilteredCommand}"
-                                    Padding="10,4" Margin="0,0,8,0"
-                                    Background="#D1FAE5" Foreground="#064E3B"
-                                    BorderThickness="0" Cursor="Hand" FontSize="11" FontWeight="SemiBold"/>
-							<Button Content="✕ Öğrenci Seçimini Temizle"
-                                    Command="{Binding DeselectAllFilteredCommand}"
-                                    Padding="10,4"
-                                    Background="#FEE2E2" Foreground="#991B1B"
-                                    BorderThickness="0" Cursor="Hand" FontSize="11" FontWeight="SemiBold"/>
-						</StackPanel>
-
-						<Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6" Height="220">
-							<ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4">
-								<ItemsControl ItemsSource="{Binding FilteredStudents}">
-									<ItemsControl.ItemTemplate>
-										<DataTemplate>
-											<CheckBox IsChecked="{Binding IsSelected}" Margin="8,6" Cursor="Hand">
-												<TextBlock FontSize="14">
-													<Run Text="{Binding StudentNumber}" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}"/>
-													<Run Text=" - "/>
-													<Run Text="{Binding FullName}"/>
-													<Run Text=" (" Foreground="{StaticResource TextSecondaryBrush}"/>
-													<Run Text="{Binding ClassName}" Foreground="{StaticResource TextSecondaryBrush}"/>
-													<Run Text=")" Foreground="{StaticResource TextSecondaryBrush}"/>
-												</TextBlock>
-											</CheckBox>
-										</DataTemplate>
-									</ItemsControl.ItemTemplate>
-								</ItemsControl>
-							</ScrollViewer>
-						</Border>
-					</StackPanel>
-				</Border>
-
-                    <!-- Satır 2: Kitapçık ayarları -->
-                    <Grid Margin="0,12,0,0">
+                    <!-- Kitapçık ayarları -->
+                    <Grid Margin="0,16,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="14"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="24"/>
+                            <ColumnDefinition Width="28"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="Kitapçık Sayısı:" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <TextBlock Grid.Column="0" Text="Kitapçık Sayısı"
+                                   VerticalAlignment="Center" FontWeight="SemiBold"/>
                         <ComboBox Grid.Column="2"
                                   SelectedItem="{Binding BookletCount}"
-                                  Padding="8,6" Width="80" VerticalAlignment="Center">
+                                  Width="80" VerticalAlignment="Center">
                             <ComboBox.Items>
                                 <sys:Int32>1</sys:Int32>
                                 <sys:Int32>2</sys:Int32>
@@ -181,23 +126,99 @@
                         <CheckBox Grid.Column="4"
                                   IsChecked="{Binding ShuffleOptions}"
                                   Content="Şıkları karıştır"
-                                  VerticalAlignment="Center"
-                                  FontWeight="SemiBold"/>
+                                  VerticalAlignment="Center"/>
 
-                        <TextBlock Grid.Column="5" VerticalAlignment="Center" Margin="16,0,0,0"
-                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"
-                                   TextWrapping="Wrap">
-                            ℹ Birden fazla kitapçıkta sorular farklı sırayla çıkar. "Şıkları karıştır" seçilirse B/C/D kitapçıklarında şıklar da permüte edilir.
-                        </TextBlock>
+                        <TextBlock Grid.Column="5" VerticalAlignment="Center" Margin="20,0,0,0"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"
+                                   Text="Birden fazla kitapçıkta sorular farklı sırayla çıkar. 'Şıkları karıştır' seçilirse B/C/D kitapçıklarında şıklar da permüte edilir."/>
                     </Grid>
+
+                    <!-- Öğrenci seçimi -->
+                    <Border BorderBrush="{StaticResource BorderSubtleBrush}"
+                            BorderThickness="0,1,0,0"
+                            Margin="0,18,0,0"
+                            Padding="0,18,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Sınava Girecek Öğrenciler" Style="{StaticResource SubheadingStyle}"/>
+                            <TextBlock Text="Birden fazla bölüm/sınıf seçebilirsiniz (alttan alan, yükseltme veya ortak ders öğrencileri)."
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="12" Margin="0,-8,0,12"/>
+
+                            <TextBlock Text="Sınıf / Bölüm Filtresi" Style="{StaticResource LabelStyle}"/>
+                            <Border BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    MaxHeight="100"
+                                    Background="{StaticResource PageBgBrush}"
+                                    Margin="0,0,0,10">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
+                                    <ItemsControl ItemsSource="{Binding ClassFilters}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <CheckBox Content="{Binding ClassName}"
+                                                          IsChecked="{Binding IsSelected}"
+                                                          Margin="6,4"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Border>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <Button Content="Tüm Sınıfları Seç"
+                                        Command="{Binding SelectAllClassesCommand}"
+                                        Style="{StaticResource MiniButtonStyle}"/>
+                                <Button Content="Sınıf Filtresini Temizle"
+                                        Command="{Binding ClearClassFilterCommand}"
+                                        Style="{StaticResource MiniButtonStyle}"/>
+                                <Border Width="1" Background="{StaticResource BorderBrush}" Margin="6,2,12,2"/>
+                                <Button Content="Filtredeki Tüm Öğrencileri Seç"
+                                        Command="{Binding SelectAllFilteredCommand}"
+                                        Style="{StaticResource MiniButtonStyle}"/>
+                                <Button Content="Öğrenci Seçimini Temizle"
+                                        Command="{Binding DeselectAllFilteredCommand}"
+                                        Style="{StaticResource MiniButtonStyle}"/>
+                            </StackPanel>
+
+                            <Border BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Height="220"
+                                    Background="{StaticResource CardBgBrush}">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="6">
+                                    <ItemsControl ItemsSource="{Binding FilteredStudents}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding IsSelected}" Margin="8,5">
+                                                    <TextBlock FontSize="13">
+                                                        <Run Text="{Binding StudentNumber}" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}"/>
+                                                        <Run Text="  ·  "/>
+                                                        <Run Text="{Binding FullName}"/>
+                                                        <Run Text="  ("/><Run Text="{Binding ClassName}" Foreground="{StaticResource TextSecondaryBrush}"/><Run Text=")"/>
+                                                    </TextBlock>
+                                                </CheckBox>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Border>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </Border>
 
             <!-- İki kolonlu havuz vs. seçili sorular -->
-            <Grid Grid.Row="2" Margin="0,12,0,0">
+            <Grid Grid.Row="2" Margin="0,0,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="14"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
@@ -210,68 +231,180 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Text="🔍 Soru Havuzu" Style="{StaticResource SubheadingStyle}"/>
+                        <TextBlock Grid.Row="0" Text="Soru Havuzu" Style="{StaticResource SubheadingStyle}"/>
 
-                        <Grid Grid.Row="1" Margin="0,0,0,8">
+                        <Grid Grid.Row="1" Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Text="{Binding BankSearchText, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="8,6"/>
-                            <Button Grid.Column="1" Content="Ara"
+                            <TextBox Text="{Binding BankSearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                            <Button Grid.Column="1"
+                                    Content="Ara"
                                     Command="{Binding SearchPoolCommand}"
-                                    Background="{StaticResource PrimaryBrush}"
-                                    Foreground="White"
-                                    Padding="14,6" Margin="6,0,0,0"
-                                    BorderThickness="0" Cursor="Hand"/>
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Margin="8,0,0,0"/>
                         </Grid>
 
                         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding BankPool}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                                                CornerRadius="4" Padding="10" Margin="0,0,0,6"
-                                                Background="#FAFAFA">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel Grid.Column="0">
-                                                    <TextBlock Text="{Binding QuestionText}"
-                                                               TextWrapping="Wrap" FontSize="12"/>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                                        <Border Background="#DBEAFE" CornerRadius="3" Padding="4,1" Margin="0,0,4,0">
-                                                            <TextBlock Text="{Binding Type}" Foreground="#1E3A8A" FontSize="10"/>
-                                                        </Border>
-                                                        <Border Background="#F3F4F6" CornerRadius="3" Padding="4,1">
-                                                            <TextBlock FontSize="10" Foreground="{StaticResource TextSecondaryBrush}">
-                                                                <Run Text="{Binding MaxPoints}"/>
-                                                                <Run Text="p"/>
-                                                            </TextBlock>
-                                                        </Border>
+                            <StackPanel>
+                                <ItemsControl ItemsSource="{Binding BankPool}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{StaticResource BorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="6"
+                                                    Padding="12"
+                                                    Margin="0,0,0,8"
+                                                    Background="{StaticResource CardBgBrush}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="{Binding QuestionText}"
+                                                                   TextWrapping="Wrap"
+                                                                   FontSize="13"
+                                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                            <Border Style="{StaticResource ChipStyle}">
+                                                                <TextBlock Text="{Binding Type}" Style="{StaticResource ChipTextStyle}"/>
+                                                            </Border>
+                                                            <Border Style="{StaticResource ChipStyle}">
+                                                                <TextBlock Style="{StaticResource ChipTextStyle}">
+                                                                    <Run Text="{Binding MaxPoints}"/>
+                                                                    <Run Text=" puan"/>
+                                                                </TextBlock>
+                                                            </Border>
+                                                        </StackPanel>
                                                     </StackPanel>
-                                                </StackPanel>
-                                                <Button Grid.Column="1"
-                                                        Content="+"
-                                                        Command="{Binding DataContext.AddToExamCommand,
-                                                                  RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        CommandParameter="{Binding}"
-                                                        Background="{StaticResource SuccessBrush}"
-                                                        Foreground="White"
-                                                        Padding="10,4"
-                                                        BorderThickness="0"
-                                                        Cursor="Hand"
-                                                        FontWeight="Bold" FontSize="14"
-                                                        Margin="6,0,0,0"
-                                                        VerticalAlignment="Center"/>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <Button Content="Detay"
+                                                                Command="{Binding DataContext.ShowQuestionDetailCommand,
+                                                                          RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                                Padding="10,5"
+                                                                FontSize="11"
+                                                                Margin="6,0,0,0"/>
+                                                        <Button Content="Ekle"
+                                                                Command="{Binding DataContext.AddToExamCommand,
+                                                                          RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                Style="{StaticResource PrimaryButtonStyle}"
+                                                                Padding="14,5"
+                                                                FontSize="11"
+                                                                Margin="6,0,0,0"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Soru Detay Paneli -->
+                                <Border BorderBrush="{StaticResource PrimaryBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Padding="14"
+                                        Margin="0,4,0,0"
+                                        Background="{StaticResource PrimaryLightBrush}"
+                                        Visibility="{Binding DetailQuestionModel, Converter={StaticResource BoolToVisibility}}">
+                                    <StackPanel>
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Soru Detayı"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="14"
+                                                       Foreground="{StaticResource PrimaryDarkBrush}"
+                                                       VerticalAlignment="Center"/>
+                                            <Button Grid.Column="1"
+                                                    Content="Kapat"
+                                                    Command="{Binding CloseQuestionDetailCommand}"
+                                                    Style="{StaticResource GhostButtonStyle}"
+                                                    Padding="8,4"
+                                                    FontSize="11"/>
+                                        </Grid>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                            <Border Style="{StaticResource ChipStyle}" Background="{StaticResource CardBgBrush}">
+                                                <TextBlock Text="{Binding DetailQuestionModel.Type}" Style="{StaticResource ChipTextStyle}"/>
+                                            </Border>
+                                            <Border Style="{StaticResource ChipStyle}" Background="{StaticResource CardBgBrush}">
+                                                <TextBlock Style="{StaticResource ChipTextStyle}">
+                                                    <Run Text="{Binding DetailQuestionModel.MaxPoints}"/>
+                                                    <Run Text=" puan"/>
+                                                </TextBlock>
+                                            </Border>
+                                            <Border Style="{StaticResource ChipStyle}"
+                                                    Background="#ECFDF5"
+                                                    BorderBrush="{StaticResource SuccessBrush}">
+                                                <TextBlock Style="{StaticResource ChipTextStyle}" Foreground="#065F46">
+                                                    <Run Text="Doğru: "/>
+                                                    <Run Text="{Binding DetailQuestionModel.CorrectOption}"/>
+                                                </TextBlock>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock Text="{Binding DetailQuestionModel.QuestionText}"
+                                                   TextWrapping="Wrap"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   Margin="0,0,0,10"/>
+
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="22"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="A" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DetailQuestionModel.OptionA}" TextWrapping="Wrap" Margin="0,0,0,3"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="B" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DetailQuestionModel.OptionB}" TextWrapping="Wrap" Margin="0,0,0,3"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="C" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DetailQuestionModel.OptionC}" TextWrapping="Wrap" Margin="0,0,0,3"/>
+                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="D" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DetailQuestionModel.OptionD}" TextWrapping="Wrap" Margin="0,0,0,3"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="0" Text="E" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DetailQuestionModel.OptionE}" TextWrapping="Wrap"/>
+                                        </Grid>
+
+                                        <ItemsControl ItemsSource="{Binding DetailQuestion.LearningOutcomeCodes}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{StaticResource CardBgBrush}"
+                                                            BorderBrush="{StaticResource PrimaryBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="4"
+                                                            Padding="6,2"
+                                                            Margin="0,0,4,4">
+                                                        <TextBlock Text="{Binding}"
+                                                                   Foreground="{StaticResource PrimaryDarkBrush}"
+                                                                   FontSize="10"
+                                                                   FontWeight="SemiBold"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
                         </ScrollViewer>
                     </Grid>
                 </Border>
@@ -285,26 +418,42 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Style="{StaticResource SubheadingStyle}">
-                            <Run Text="✓ Seçilen Sorular ("/>
-                            <Run Text="{Binding SelectedQuestions.Count, Mode=OneWay}"/>
-                            <Run Text=")"/>
-                        </TextBlock>
+                        <Grid Grid.Row="0" Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                        <!-- Denge önizlemesi -->
-                        <Border Grid.Row="1" Background="#F0F9FF" CornerRadius="4" Padding="10" Margin="0,0,0,8"
+                            <TextBlock Grid.Column="0" Style="{StaticResource SubheadingStyle}" Margin="0">
+                                <Run Text="Seçilen Sorular ("/>
+                                <Run Text="{Binding SelectedQuestions.Count, Mode=OneWay}"/>
+                                <Run Text=")"/>
+                            </TextBlock>
+
+                            <Button Grid.Column="1"
+                                    Content="100 Puana Eşitle"
+                                    Command="{Binding DistributePointsTo100Command}"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Padding="10,5"
+                                    FontSize="11"
+                                    ToolTip="Toplam puanı 100 olacak şekilde tüm seçili sorulara eşit dağıtır."/>
+                        </Grid>
+
+                        <Border Grid.Row="1"
+                                Style="{StaticResource AlertInfoStyle}"
+                                Margin="0,0,0,10"
                                 Visibility="{Binding BalancePreview, Converter={StaticResource BoolToVisibility}}">
                             <StackPanel>
-                                <TextBlock FontSize="11" Foreground="#0C4A6E">
-                                    <Run Text="⚖ Denge Skoru:"/>
+                                <TextBlock Foreground="{StaticResource PrimaryDarkBrush}" FontSize="12">
+                                    <Run Text="Denge Skoru: "/>
                                     <Run Text="{Binding BalancePreview.BalanceScore, FallbackValue='—'}" FontWeight="Bold"/>
-                                    <Run Text="/100"/>
+                                    <Run Text=" / 100"/>
                                 </TextBlock>
-                                <TextBlock FontSize="10" Foreground="#0C4A6E"
+                                <TextBlock FontSize="11"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
                                            Visibility="{Binding BalancePreview.Warnings.Count, Converter={StaticResource BoolToVisibility}}">
-                                    <Run Text="⚠"/>
                                     <Run Text="{Binding BalancePreview.Warnings.Count}"/>
-                                    <Run Text="uyarı var (Sınav Dengesi sekmesinden inceleyin)"/>
+                                    <Run Text=" uyarı var — Sınav Dengesi sekmesinden inceleyin."/>
                                 </TextBlock>
                             </StackPanel>
                         </Border>
@@ -313,9 +462,12 @@
                             <ItemsControl ItemsSource="{Binding SelectedQuestions}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="{StaticResource PrimaryBrush}" BorderThickness="1"
-                                                CornerRadius="4" Padding="10" Margin="0,0,0,6"
-                                                Background="#EFF6FF">
+                                        <Border BorderBrush="{StaticResource PrimaryBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                Padding="12"
+                                                Margin="0,0,0,8"
+                                                Background="{StaticResource PrimaryLightBrush}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
@@ -323,15 +475,17 @@
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Grid.Column="0">
                                                     <TextBlock Text="{Binding QuestionText}"
-                                                               TextWrapping="Wrap" FontSize="12"/>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                                        <Border Background="#DBEAFE" CornerRadius="3" Padding="4,1" Margin="0,0,4,0">
-                                                            <TextBlock Text="{Binding Type}" Foreground="#1E3A8A" FontSize="10"/>
+                                                               TextWrapping="Wrap"
+                                                               FontSize="13"
+                                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                        <Border Style="{StaticResource ChipStyle}" Background="{StaticResource CardBgBrush}">
+                                                            <TextBlock Text="{Binding Type}" Style="{StaticResource ChipTextStyle}"/>
                                                         </Border>
-                                                        <Border Background="#F3F4F6" CornerRadius="3" Padding="4,1">
-                                                            <TextBlock FontSize="10" Foreground="{StaticResource TextSecondaryBrush}">
+                                                        <Border Style="{StaticResource ChipStyle}" Background="{StaticResource CardBgBrush}">
+                                                            <TextBlock Style="{StaticResource ChipTextStyle}">
                                                                 <Run Text="{Binding MaxPoints}"/>
-                                                                <Run Text="p"/>
+                                                                <Run Text=" puan"/>
                                                             </TextBlock>
                                                         </Border>
                                                     </StackPanel>
@@ -341,28 +495,25 @@
                                                             Command="{Binding DataContext.MoveUpCommand,
                                                                       RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Background="#F3F4F6"
-                                                            BorderThickness="0"
-                                                            Padding="6,2" Margin="2,0"
-                                                            Cursor="Hand" FontSize="12"/>
+                                                            Style="{StaticResource SecondaryButtonStyle}"
+                                                            Padding="8,4"
+                                                            FontSize="12"
+                                                            Margin="0,0,4,0"/>
                                                     <Button Content="↓"
                                                             Command="{Binding DataContext.MoveDownCommand,
                                                                       RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Background="#F3F4F6"
-                                                            BorderThickness="0"
-                                                            Padding="6,2" Margin="2,0"
-                                                            Cursor="Hand" FontSize="12"/>
-                                                    <Button Content="✕"
+                                                            Style="{StaticResource SecondaryButtonStyle}"
+                                                            Padding="8,4"
+                                                            FontSize="12"
+                                                            Margin="0,0,4,0"/>
+                                                    <Button Content="Çıkar"
                                                             Command="{Binding DataContext.RemoveFromExamCommand,
                                                                       RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Background="Transparent"
-                                                            Foreground="{StaticResource DangerBrush}"
-                                                            BorderBrush="{StaticResource DangerBrush}"
-                                                            BorderThickness="1"
-                                                            Padding="6,2" Margin="4,0,0,0"
-                                                            Cursor="Hand" FontSize="11"/>
+                                                            Style="{StaticResource DangerButtonStyle}"
+                                                            Padding="10,4"
+                                                            FontSize="11"/>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -375,8 +526,11 @@
             </Grid>
 
             <!-- Alt bar -->
-            <Border Grid.Row="3" Background="White" BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,12,0,0">
+            <Border Grid.Row="3"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="0,14,0,0"
+                    Margin="0,14,0,0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -384,28 +538,27 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <Border Background="#FEE2E2" BorderBrush="{StaticResource DangerBrush}" BorderThickness="1"
-                                CornerRadius="4" Padding="12,6"
+                        <Border Style="{StaticResource AlertErrorStyle}"
                                 Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}">
-                            <TextBlock Text="{Binding ErrorMessage}" Foreground="#991B1B" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding ErrorMessage}"
+                                       Foreground="#991B1B"
+                                       TextWrapping="Wrap"/>
                         </Border>
-                        <Border Background="#D1FAE5" BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1"
-                                CornerRadius="4" Padding="12,6"
+                        <Border Style="{StaticResource AlertSuccessStyle}"
                                 Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}">
-                            <TextBlock Text="{Binding SuccessMessage}" Foreground="#064E3B" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding SuccessMessage}"
+                                       Foreground="#065F46"
+                                       TextWrapping="Wrap"/>
                         </Border>
                     </StackPanel>
 
                     <Button Grid.Column="1"
-                            Content="💾 Sınavı Oluştur"
+                            Content="Sınavı Oluştur"
                             Command="{Binding SaveCommand}"
-                            Background="{StaticResource PrimaryBrush}"
-                            Foreground="White"
-                            Padding="24,12"
-                            FontSize="14" FontWeight="SemiBold"
-                            BorderThickness="0"
-                            Cursor="Hand"
-                            Margin="16,0,0,0"/>
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Padding="28,12"
+                            FontSize="14"
+                            Margin="20,0,0,0"/>
                 </Grid>
             </Border>
         </Grid>

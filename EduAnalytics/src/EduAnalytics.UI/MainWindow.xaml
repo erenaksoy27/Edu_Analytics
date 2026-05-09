@@ -3,10 +3,21 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:EduAnalytics.UI.ViewModels"
         xmlns:views="clr-namespace:EduAnalytics.UI.Views"
+        xmlns:mi="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         Title="EduAnalytics"
-        Height="820" Width="1320"
+        MinHeight="720" MinWidth="1200"
         WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="CanResize"
         Background="{StaticResource PageBgBrush}">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="40"
+                      ResizeBorderThickness="6"
+                      GlassFrameThickness="0"
+                      UseAeroCaptionButtons="False"
+                      CornerRadius="0"/>
+    </WindowChrome.WindowChrome>
 
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
@@ -14,9 +25,6 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ExamAnalysisViewModel}">
             <views:ExamAnalysisView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ExamCreateViewModel}">
-            <views:ExamCreateView/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:AnswerEntryViewModel}">
             <views:AnswerEntryView/>
@@ -39,6 +47,9 @@
         <DataTemplate DataType="{x:Type vm:ExamFromBankViewModel}">
             <views:ExamFromBankView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ExamManagementViewModel}">
+            <views:ExamManagementView/>
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:SingleQuestionCreateViewModel}">
             <views:SingleQuestionCreateView/>
         </DataTemplate>
@@ -53,44 +64,91 @@
         </DataTemplate>
     </Window.Resources>
 
+    <Window.InputBindings>
+        <KeyBinding Key="D1" Modifiers="Ctrl" Command="{Binding NavigateToDashboardCommand}"/>
+        <KeyBinding Key="D2" Modifiers="Ctrl" Command="{Binding NavigateToExamManagementCommand}"/>
+        <KeyBinding Key="D3" Modifiers="Ctrl" Command="{Binding NavigateToQuestionBankCommand}"/>
+        <KeyBinding Key="D4" Modifiers="Ctrl" Command="{Binding NavigateToStudentsCommand}"/>
+        <KeyBinding Key="D5" Modifiers="Ctrl" Command="{Binding NavigateToLearningOutcomesCommand}"/>
+        <KeyBinding Key="D6" Modifiers="Ctrl" Command="{Binding NavigateToProgramOutcomesCommand}"/>
+    </Window.InputBindings>
+
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ═══ TITLE BAR ═══ -->
+        <Border Grid.Row="0" Background="{StaticResource SidebarBgBrush}">
+            <Grid Margin="14,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <mi:MaterialIcon Kind="SchoolOutline" Width="18" Height="18"
+                                     Foreground="{StaticResource PrimaryBrush}"
+                                     VerticalAlignment="Center"/>
+                    <TextBlock Text="EduAnalytics"
+                               Foreground="{StaticResource SidebarTextBrush}"
+                               FontSize="14" FontWeight="SemiBold"
+                               Margin="8,0,0,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="Ölçme değerlendirme paneli"
+                               Foreground="{StaticResource SidebarMutedBrush}"
+                               FontSize="11" Margin="12,0,0,0"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="ThemeToggleBtn"
+                            Click="ToggleTheme_Click"
+                            Style="{StaticResource TitleBarButtonStyle}"
+                            ToolTip="Tema: Açık">
+                        <mi:MaterialIcon x:Name="ThemeIcon" Kind="WeatherSunny" Width="14" Height="14"/>
+                    </Button>
+                    <Button Click="MinimizeWindow"
+                            Style="{StaticResource TitleBarButtonStyle}"
+                            ToolTip="Küçült">
+                        <mi:MaterialIcon Kind="WindowMinimize" Width="14" Height="14"/>
+                    </Button>
+                    <Button Click="ToggleMaximizeWindow"
+                            Style="{StaticResource TitleBarButtonStyle}"
+                            ToolTip="Büyüt / Küçült">
+                        <mi:MaterialIcon Kind="WindowMaximize" Width="14" Height="14"/>
+                    </Button>
+                    <Button Click="CloseWindow"
+                            Style="{StaticResource TitleBarCloseButtonStyle}"
+                            ToolTip="Kapat">
+                        <mi:MaterialIcon Kind="WindowClose" Width="14" Height="14"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ═══ BODY ═══ -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="248"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
         <!-- ═══ SOL MENÜ ═══ -->
         <Border Grid.Column="0" Background="{StaticResource SidebarBgBrush}">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel TextElement.Foreground="#E2E8F0">
-                    <!-- Logo -->
-                    <StackPanel Orientation="Horizontal" Margin="20,24,20,20">
-                        <Border Width="30" Height="30"
-                                Background="{StaticResource PrimaryBrush}"
-                                CornerRadius="7" VerticalAlignment="Center">
-                            <TextBlock Text="E"
-                                       Foreground="White"
-                                       FontWeight="Bold" FontSize="16"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-                        </Border>
-                        <TextBlock Text="EduAnalytics"
-                                   Foreground="White"
-                                   FontSize="15" FontWeight="SemiBold"
-                                   VerticalAlignment="Center"
-                                   Margin="10,0,0,0"/>
-                    </StackPanel>
 
                     <!-- GENEL -->
                     <TextBlock Text="GENEL" Style="{StaticResource SidebarSectionTitleStyle}"/>
 
                     <Button Tag="Dashboard"
                             Command="{Binding NavigateToDashboardCommand}"
-                            Style="{StaticResource SidebarButtonStyle}">
+                            Style="{StaticResource SidebarButtonStyle}"
+                            ToolTip="Dashboard (Ctrl+1)">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🏠" Width="22" FontSize="13"
-                                       VerticalAlignment="Center" TextAlignment="Center"/>
-                            <TextBlock Text="Dashboard" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <mi:MaterialIcon Kind="ViewDashboard" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="Dashboard" Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -98,9 +156,8 @@
                             Command="{Binding NavigateToAcademicStructureCommand}"
                             Style="{StaticResource SidebarButtonStyle}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🏛" Width="22" FontSize="13"
-                                       VerticalAlignment="Center" TextAlignment="Center"/>
-                            <TextBlock Text="Akademik Yapı" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <mi:MaterialIcon Kind="School" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="Akademik Yapı" Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -109,21 +166,11 @@
 
                     <Button Tag="QuestionBank"
                             Command="{Binding NavigateToQuestionBankCommand}"
-                            Style="{StaticResource SidebarButtonStyle}">
+                            Style="{StaticResource SidebarButtonStyle}"
+                            ToolTip="Soru Bankası (Ctrl+3)">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📚" Width="22" FontSize="13"
-                                       VerticalAlignment="Center" TextAlignment="Center"/>
-                            <TextBlock Text="Soru Bankası" Margin="10,0,0,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button Tag="CreateExam"
-                            Command="{Binding NavigateToCreateExamCommand}"
-                            Style="{StaticResource SidebarButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📝" Width="22" FontSize="13"
-                                       VerticalAlignment="Center" TextAlignment="Center"/>
-                            <TextBlock Text="Yeni Sınav Oluştur" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <mi:MaterialIcon Kind="HelpBoxMultipleOutline" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="Soru Bankası" Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -131,9 +178,18 @@
                             Command="{Binding NavigateToExamFromBankCommand}"
                             Style="{StaticResource SidebarButtonStyle}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📦" Width="22" FontSize="13"
-                                       VerticalAlignment="Center" TextAlignment="Center"/>
-                            <TextBlock Text="Bankadan Sınav" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <mi:MaterialIcon Kind="ClipboardListOutline" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="Bankadan Sınav" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Tag="ExamManagement"
+                            Command="{Binding NavigateToExamManagementCommand}"
+                            Style="{StaticResource SidebarButtonStyle}"
+                            ToolTip="Sınav Yönetimi (Ctrl+2)">
+                        <StackPanel Orientation="Horizontal">
+                            <mi:MaterialIcon Kind="FileDocumentMultipleOutline" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="Sınav Yönetimi" Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -142,21 +198,21 @@
 
                     <Button Tag="LearningOutcomes"
                             Command="{Binding NavigateToLearningOutcomesCommand}"
-                            Style="{StaticResource SidebarButtonStyle}">
+                            Style="{StaticResource SidebarButtonStyle}"
+                            ToolTip="Öğrenim Çıktıları (Ctrl+5)">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🎯" Width="22" FontSize="13"
-                                       VerticalAlignment="Center" TextAlignment="Center"/>
-                            <TextBlock Text="Ders Çıktıları (ÖÇ)" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <mi:MaterialIcon Kind="Target" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="Öğrenim Çıktıları" Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
                     <Button Tag="ProgramOutcomes"
                             Command="{Binding NavigateToProgramOutcomesCommand}"
-                            Style="{StaticResource SidebarButtonStyle}">
+                            Style="{StaticResource SidebarButtonStyle}"
+                            ToolTip="Program Çıktıları (Ctrl+6)">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🎓" Width="22" FontSize="13"
-                                       VerticalAlignment="Center" TextAlignment="Center"/>
-                            <TextBlock Text="Program Çıktıları (PÇ)" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <mi:MaterialIcon Kind="ChartBar" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="Program Çıktıları" Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -164,9 +220,8 @@
                             Command="{Binding NavigateToProgramOutcomeMappingCommand}"
                             Style="{StaticResource SidebarButtonStyle}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🔗" Width="22" FontSize="13"
-                                       VerticalAlignment="Center" TextAlignment="Center"/>
-                            <TextBlock Text="PÇ ↔ ÖÇ Eşleştirme" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <mi:MaterialIcon Kind="SwapHorizontal" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="PÇ - ÖÇ Eşleştirme" Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -174,9 +229,8 @@
                             Command="{Binding NavigateToProgramOutcomeReportCommand}"
                             Style="{StaticResource SidebarButtonStyle}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📈" Width="22" FontSize="13"
-                                       VerticalAlignment="Center" TextAlignment="Center"/>
-                            <TextBlock Text="PÇ Başarı Raporu" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <mi:MaterialIcon Kind="ChartLineVariant" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="PÇ Başarı Raporu" Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -185,11 +239,11 @@
 
                     <Button Tag="Students"
                             Command="{Binding NavigateToStudentsCommand}"
-                            Style="{StaticResource SidebarButtonStyle}">
+                            Style="{StaticResource SidebarButtonStyle}"
+                            ToolTip="Öğrenciler (Ctrl+4)">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="👥" Width="22" FontSize="13"
-                                       VerticalAlignment="Center" TextAlignment="Center"/>
-                            <TextBlock Text="Öğrenciler" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <mi:MaterialIcon Kind="AccountGroup" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="Öğrenciler" Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -201,10 +255,12 @@
         <!-- ═══ ANA İÇERİK ═══ -->
         <ContentControl Grid.Column="1"
                         Content="{Binding CurrentView}"
-                        Margin="28,24"/>
+                        Margin="30,26"/>
+
+        </Grid><!-- /BODY -->
 
         <!-- ═══ TOAST BİLDİRİMLERİ ═══ -->
-        <ItemsControl Grid.ColumnSpan="2"
+        <ItemsControl Grid.RowSpan="2"
                       ItemsSource="{Binding Toasts.Toasts}"
                       HorizontalAlignment="Right"
                       VerticalAlignment="Bottom"
@@ -217,6 +273,33 @@
                             Background="{StaticResource CardBgBrush}"
                             BorderThickness="0,0,0,3"
                             CornerRadius="8" Padding="14,11">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="SlideX" X="340"/>
+                        </Border.RenderTransform>
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <!-- Slide in -->
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="SlideX"
+                                                         Storyboard.TargetProperty="X"
+                                                         To="0" Duration="0:0:0.25">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                                <!-- Slide out after 3s (service removes at 3.5s) -->
+                                <BeginStoryboard>
+                                    <Storyboard BeginTime="0:0:3">
+                                        <DoubleAnimation Storyboard.TargetName="SlideX"
+                                                         Storyboard.TargetProperty="X"
+                                                         To="340" Duration="0:0:0.25"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
                         <Border.Effect>
                             <DropShadowEffect Color="#0F172A" Direction="270"
                                               ShadowDepth="2" BlurRadius="12" Opacity="0.12"/>
@@ -237,15 +320,41 @@
                                 </Style.Triggers>
                             </Style>
                         </Border.Style>
-                        <StackPanel>
-                            <TextBlock Text="{Binding Title}"
-                                       FontWeight="SemiBold" FontSize="13"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
-                            <TextBlock Text="{Binding Message}"
-                                       TextWrapping="Wrap"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       FontSize="11" Margin="0,2,0,0"
-                                       Visibility="{Binding Message, Converter={StaticResource BoolToVisibility}}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <mi:MaterialIcon Width="18" Height="18"
+                                             VerticalAlignment="Top"
+                                             Margin="0,1,10,0">
+                                <mi:MaterialIcon.Style>
+                                    <Style TargetType="mi:MaterialIcon">
+                                        <Setter Property="Kind" Value="InformationOutline"/>
+                                        <Setter Property="Foreground" Value="{StaticResource InfoBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Severity}" Value="Success">
+                                                <Setter Property="Kind" Value="CheckCircleOutline"/>
+                                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Severity}" Value="Error">
+                                                <Setter Property="Kind" Value="AlertCircleOutline"/>
+                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Severity}" Value="Warning">
+                                                <Setter Property="Kind" Value="AlertOutline"/>
+                                                <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </mi:MaterialIcon.Style>
+                            </mi:MaterialIcon>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Title}"
+                                           FontWeight="SemiBold" FontSize="13"
+                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding Message}"
+                                           TextWrapping="Wrap"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="11" Margin="0,2,0,0"
+                                           Visibility="{Binding Message, Converter={StaticResource BoolToVisibility}}"/>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
                 </DataTemplate>

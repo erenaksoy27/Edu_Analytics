@@ -20,8 +20,8 @@ public class StudentPerformanceService : IStudentPerformanceService
         var examQuestions = await _context.ExamQuestions
             .Where(eq => eq.ExamId == examId && !eq.IsCancelled)
             .Include(eq => eq.Question)
-                .ThenInclude(q => q.QuestionTopics)
-                    .ThenInclude(qt => qt.Topic)
+                .ThenInclude(q => q.QuestionLearningOutcomes)
+                    .ThenInclude(qlo => qlo.LearningOutcome)
             .ToListAsync();
 
         if (examQuestions.Count == 0) return new List<StudentPerformanceDto>();
@@ -57,20 +57,19 @@ public class StudentPerformanceService : IStudentPerformanceService
                 return ExamAnalysisService.ComputeScore(eq.Question, a, eq.OverrideMaxPoints);
             });
 
-            // Zayıf konular: Öğrencinin başarı oranı %50'nin altında olan konular
-            var weakTopics = new List<string>();
+            var weakLearningOutcomes = new List<string>();
 
-            var topicGroups = examQuestions
-                .SelectMany(eq => eq.Question.QuestionTopics.Select(qt => new { qt.Topic, ExamQuestion = eq }))
-                .GroupBy(x => x.Topic.Id);
+            var outcomeGroups = examQuestions
+                .SelectMany(eq => eq.Question.QuestionLearningOutcomes.Select(qlo => new { qlo.LearningOutcome, ExamQuestion = eq }))
+                .GroupBy(x => x.LearningOutcome.Id);
 
-            foreach (var tg in topicGroups)
+            foreach (var outcomeGroup in outcomeGroups)
             {
-                var topic = tg.First().Topic;
-                var topicEqs = tg.Select(x => x.ExamQuestion).Distinct().ToList();
-                var topicQIds = topicEqs.Select(eq => eq.QuestionId).ToHashSet();
+                var outcome = outcomeGroup.First().LearningOutcome;
+                var outcomeEqs = outcomeGroup.Select(x => x.ExamQuestion).Distinct().ToList();
+                var outcomeQuestionIds = outcomeEqs.Select(eq => eq.QuestionId).ToHashSet();
 
-                var relevant = studentAnswers.Where(a => topicQIds.Contains(a.QuestionId)).ToList();
+                var relevant = studentAnswers.Where(a => outcomeQuestionIds.Contains(a.QuestionId)).ToList();
                 if (relevant.Count == 0) continue;
 
                 decimal earned = 0;
@@ -83,7 +82,7 @@ public class StudentPerformanceService : IStudentPerformanceService
                 }
 
                 var rate = possible > 0 ? (double)(earned / possible) * 100 : 0;
-                if (rate < 50) weakTopics.Add(topic.Title);
+                if (rate < 50) weakLearningOutcomes.Add($"{outcome.Code} - {outcome.Name}");
             }
 
             results.Add(new StudentPerformanceDto
@@ -99,7 +98,7 @@ public class StudentPerformanceService : IStudentPerformanceService
                 TotalScore = Math.Round(totalScore, 2),
                 MaxPossibleScore = maxPossible,
                 SuccessRate = maxPossible > 0 ? Math.Round((double)(totalScore / maxPossible) * 100, 1) : 0,
-                WeakTopics = weakTopics
+                WeakLearningOutcomes = weakLearningOutcomes
             });
         }
 

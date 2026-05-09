@@ -355,6 +355,83 @@ public class ExamCrudService : IExamCrudService
         return user?.Id ?? throw new InvalidOperationException("Sistemde kullanıcı bulunamadı.");
     }
 
+    public async Task<List<ExamListItemDto>> GetAllExamsAsync()
+    {
+        return await _context.Exams
+            .Include(e => e.Course)
+            .Include(e => e.ExamQuestions)
+                .ThenInclude(eq => eq.Question)
+            .Include(e => e.StudentAnswers)
+            .OrderByDescending(e => e.ExamDate)
+            .Select(e => new ExamListItemDto
+            {
+                Id = e.Id,
+                Title = e.Title,
+                CourseId = e.CourseId,
+                CourseName = e.Course.Name,
+                ExamDate = e.ExamDate,
+                DurationMinutes = e.DurationMinutes,
+                ExamType = e.ExamType,
+                BookletCount = e.BookletCount,
+                ShuffleOptions = e.ShuffleOptions,
+                TotalQuestions = e.ExamQuestions.Count,
+                TotalAnswers = e.StudentAnswers.Count,
+                Questions = e.ExamQuestions
+                    .OrderBy(eq => eq.OrderInExam)
+                    .Select(eq => new ExamListQuestionDto
+                    {
+                        QuestionId = eq.QuestionId,
+                        QuestionNumber = eq.OrderInExam,
+                        QuestionText = eq.Question.QuestionText,
+                        Type = eq.Question.Type,
+                        MaxPoints = eq.OverrideMaxPoints ?? eq.Question.MaxPoints,
+                        IsCancelled = eq.IsCancelled
+                    })
+                    .ToList()
+            })
+            .ToListAsync();
+    }
+
+    public async Task<ExamUpdateModel?> GetExamForEditAsync(int examId)
+    {
+        var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Id == examId);
+        if (exam == null) return null;
+
+        return new ExamUpdateModel
+        {
+            Id = exam.Id,
+            Title = exam.Title,
+            ExamDate = exam.ExamDate,
+            DurationMinutes = exam.DurationMinutes,
+            ExamType = exam.ExamType
+        };
+    }
+
+    public async Task UpdateExamAsync(ExamUpdateModel model)
+    {
+        if (string.IsNullOrWhiteSpace(model.Title))
+            throw new ArgumentException("Sınav başlığı boş olamaz.", nameof(model));
+
+        var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Id == model.Id)
+            ?? throw new InvalidOperationException($"Sınav bulunamadı: {model.Id}");
+
+        exam.Title = model.Title.Trim();
+        exam.ExamDate = model.ExamDate;
+        exam.DurationMinutes = model.DurationMinutes <= 0 ? 60 : model.DurationMinutes;
+        exam.ExamType = model.ExamType;
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteExamAsync(int examId)
+    {
+        var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Id == examId)
+            ?? throw new InvalidOperationException($"Sınav bulunamadı: {examId}");
+
+        _context.Exams.Remove(exam);
+        await _context.SaveChangesAsync();
+    }
+
     /// <summary>
     /// Şık karıştırma haritası üretir. "A:C,B:A,C:D,D:B,E:E" formatında.
     /// </summary>

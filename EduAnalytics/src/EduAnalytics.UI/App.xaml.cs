@@ -1,10 +1,12 @@
 using System.Windows;
+using System.Windows.Threading;
 using EduAnalytics.Business.Services.Implementations;
 using EduAnalytics.Business.Services.Interfaces;
 using EduAnalytics.DataAccess.Context;
 using EduAnalytics.DataAccess.Seed;
 using EduAnalytics.UI.Services;
 using EduAnalytics.UI.ViewModels;
+using EduAnalytics.UI.Views;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,7 +16,7 @@ public partial class App : Application
 {
     public static IServiceProvider Services { get; private set; } = null!;
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
@@ -22,25 +24,47 @@ public partial class App : Application
         ConfigureServices(services);
         Services = services.BuildServiceProvider();
 
-        // İlk açılışta veritabanını oluştur ve seed uygula
-        try
+        var splash = new SplashWindow();
+        splash.Show();
+
+        // Let WPF render the splash before blocking work starts
+        await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Loaded);
+
+        Exception? startupError = null;
+        await Task.WhenAll(
+            Task.Run(() =>
+            {
+                try
+                {
+                    var ctx = Services.GetRequiredService<EduAnalyticsDbContext>();
+                    DbInitializer.Seed(ctx);
+                    ctx.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    startupError = ex;
+                }
+            }),
+            Task.Delay(600)
+        );
+
+        if (startupError != null)
         {
-            var ctx = Services.GetRequiredService<EduAnalyticsDbContext>();
-            DbInitializer.Seed(ctx);
-            ctx.Dispose();
-        }
-        catch (Exception ex)
-        {
+            splash.Close();
             MessageBox.Show(
-                $"Veritabanı başlatılamadı:\n\n{ex.GetType().Name}: {ex.Message}\n\n{ex.InnerException?.Message}",
+                $"Veritabanı başlatılamadı:\n\n{startupError.GetType().Name}: {startupError.Message}\n\n{startupError.InnerException?.Message}",
                 "Başlangıç Hatası",
                 MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown();
             return;
         }
 
+        // Tema: splash görünürken yükle (kullanıcı değişimi hissetmez)
+        Services.GetRequiredService<IThemeService>().LoadAndApply();
+
         var mainWindow = Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
+        await splash.FadeOutAndCloseAsync();
     }
 
     private static void ConfigureServices(ServiceCollection services)
@@ -74,6 +98,8 @@ public partial class App : Application
         services.AddTransient<IExamCancellationService, ExamCancellationService>();
         services.AddTransient<IStudentService, StudentService>();
         services.AddTransient<IAcademicStructureService, AcademicStructureService>();
+        services.AddTransient<IExamStatisticsService, ExamStatisticsService>();
+        services.AddTransient<IItemAnalysisService, ItemAnalysisService>();
 
         // ViewModels
         services.AddTransient<MainViewModel>();
@@ -94,14 +120,17 @@ public partial class App : Application
         // FAZ 4 — İleri özellikler
         services.AddTransient<QuestionGroupEditorViewModel>();
         services.AddTransient<ExamFromBankViewModel>();
+        services.AddTransient<ExamManagementViewModel>();
+        services.AddTransient<QuestionEditDialogViewModel>();
         services.AddTransient<SingleQuestionCreateViewModel>();
 
         // FAZ 5 — Rubric (klasik soru kriter-bazlı puanlama)
         services.AddTransient<IRubricService, RubricService>();
         services.AddTransient<RubricGradeDialogViewModel>();
 
-        // UI altyapı: Toast bildirimleri (singleton — tüm uygulama aynı kuyruğu paylaşır)
+        // UI altyapı
         services.AddSingleton<ToastService>();
+        services.AddSingleton<IThemeService, ThemeService>();
 
         // Windows
         services.AddTransient<MainWindow>();

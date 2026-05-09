@@ -4,7 +4,7 @@ using EduAnalytics.Core.Enums;
 namespace EduAnalytics.Business.Services.Interfaces;
 
 /// <summary>
-/// Ders Çıktısı (ÖÇ) yönetimi. Vize sınavlarında tarihe kadar olan ÖÇ'leri filtreler.
+/// Öğrenim Çıktısı (ÖÇ) yönetimi. Vize sınavlarında tarihe kadar olan ÖÇ'leri filtreler.
 /// </summary>
 public interface ILearningOutcomeService
 {

@@ -144,7 +144,7 @@ public class EduAnalyticsDbContext : DbContext
         });
 
         // ───────────────────────────────────────
-        // LEARNING OUTCOME (Ders Çıktısı)
+        // LEARNING OUTCOME (Öğrenim Çıktısı)
         // ───────────────────────────────────────
         modelBuilder.Entity<LearningOutcome>(entity =>
         {

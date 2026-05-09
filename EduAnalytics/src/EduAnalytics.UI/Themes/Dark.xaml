@@ -1,0 +1,64 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--   PRIMARY ACCENT — Indigo (dark: lighter tone)     -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="PrimaryBrush"        Color="#818CF8"/>  <!-- indigo-400  -->
+    <SolidColorBrush x:Key="PrimaryDarkBrush"    Color="#6D78F0"/>  <!-- indigo-400/500 -->
+    <SolidColorBrush x:Key="PrimaryLightBrush"   Color="#1E1B4B"/>  <!-- indigo-950  -->
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--   SEMANTIC (dark: 400 tonu — koyu bg üzerinde okunabilir) -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="SuccessBrush"        Color="#34D399"/>  <!-- emerald-400 -->
+    <SolidColorBrush x:Key="WarningBrush"        Color="#FBBF24"/>  <!-- amber-400   -->
+    <SolidColorBrush x:Key="DangerBrush"         Color="#F87171"/>  <!-- red-400     -->
+    <SolidColorBrush x:Key="InfoBrush"           Color="#60A5FA"/>  <!-- blue-400    -->
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--   TEXT                                              -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="TextPrimaryBrush"    Color="#F1F5F9"/>  <!-- slate-100   -->
+    <SolidColorBrush x:Key="TextSecondaryBrush"  Color="#94A3B8"/>  <!-- slate-400   -->
+    <SolidColorBrush x:Key="SubtleBrush"         Color="#64748B"/>  <!-- slate-500   -->
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--   BORDERS                                           -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="BorderBrush"         Color="#334155"/>  <!-- slate-700   -->
+    <SolidColorBrush x:Key="BorderSubtleBrush"   Color="#1E293B"/>  <!-- slate-800   -->
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--   SURFACES                                          -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="CardBgBrush"         Color="#1E293B"/>  <!-- slate-800   -->
+    <SolidColorBrush x:Key="PageBgBrush"         Color="#0F172A"/>  <!-- slate-900   -->
+    <SolidColorBrush x:Key="HoverBgBrush"        Color="#263348"/>  <!-- slate-800+  -->
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--   SIDEBAR (dark modda aynı kalır — zaten koyu)     -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="SidebarBgBrush"          Color="#111827"/>
+    <SolidColorBrush x:Key="SidebarHoverBrush"        Color="#1F2937"/>
+    <SolidColorBrush x:Key="SidebarTextBrush"         Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="SidebarMutedBrush"        Color="#9CA3AF"/>
+    <SolidColorBrush x:Key="SidebarIconBrush"         Color="#9CA3AF"/>
+    <SolidColorBrush x:Key="SidebarIconActiveBrush"   Color="#FFFFFF"/>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--   INTERACTION                                       -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="ScrollBarThumbBrush"      Color="#475569"/>  <!-- slate-600  -->
+    <SolidColorBrush x:Key="ScrollBarThumbHoverBrush" Color="#64748B"/>  <!-- slate-500  -->
+    <SolidColorBrush x:Key="SubtleHoverBrush"         Color="#1E293B"/>  <!-- slate-800  -->
+    <SolidColorBrush x:Key="GhostHoverBrush"          Color="#1E293B"/>  <!-- slate-800  -->
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--   COMPONENT TOKENS                                  -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="DataGridHoverBrush"       Color="#1E293B"/>  <!-- slate-800  -->
+    <SolidColorBrush x:Key="DataGridGridLineBrush"    Color="#1E293B"/>  <!-- slate-800  -->
+    <SolidColorBrush x:Key="DangerSubtleBrush"        Color="#450A0A"/>  <!-- red-950    -->
+
+</ResourceDictionary>

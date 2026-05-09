@@ -10,6 +10,7 @@ public interface IQuestionBankService
 {
     Task<List<QuestionBankItemDto>> SearchAsync(QuestionBankFilter filter);
     Task<QuestionBankItemDto?> GetByIdAsync(int questionId);
+    Task<QuestionBankCreateModel?> GetEditModelAsync(int questionId);
 
     Task<int> CreateAsync(QuestionBankCreateModel model);
     Task UpdateAsync(int questionId, QuestionBankCreateModel model);

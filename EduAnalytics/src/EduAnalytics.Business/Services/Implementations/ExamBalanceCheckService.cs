@@ -10,7 +10,7 @@ namespace EduAnalytics.Business.Services.Implementations;
 /// <summary>
 /// Sınav soru dağılımının dengeli olup olmadığını kontrol eder ve uyarılar üretir.
 /// Tetikleyiciler:
-///   • Tek bir konu/hafta soruların %50'sinden fazlasını kapsıyorsa → Yığılma uyarısı.
+///   • Tek bir öğrenim çıktısı soruların %50'sinden fazlasını kapsıyorsa → Yığılma uyarısı.
 ///   • Dersin bir ÖÇ'sü hiç sorulmamışsa → Eksik kapsam uyarısı.
 ///   • Test/klasik dengesi 0 ise (örn. hepsi test) → Tip dengesizliği uyarısı.
 ///   • Dağılım eşitsizliği (Gini) > 0.5 ise → Genel dengesizlik.
@@ -29,9 +29,6 @@ public class ExamBalanceCheckService : IExamBalanceCheckService
         var exam = await _context.Exams
             .Include(e => e.ExamQuestions.Where(eq => !eq.IsCancelled))
                 .ThenInclude(eq => eq.Question)
-                    .ThenInclude(q => q.QuestionTopics).ThenInclude(qt => qt.Topic)
-            .Include(e => e.ExamQuestions)
-                .ThenInclude(eq => eq.Question)
                     .ThenInclude(q => q.QuestionLearningOutcomes).ThenInclude(ql => ql.LearningOutcome)
             .FirstOrDefaultAsync(e => e.Id == examId)
             ?? throw new InvalidOperationException($"Sınav bulunamadı: {examId}");
@@ -43,7 +40,6 @@ public class ExamBalanceCheckService : IExamBalanceCheckService
     public async Task<ExamBalanceReportDto> AnalyzeDraftAsync(int courseId, List<int> questionIds)
     {
         var questions = await _context.Questions
-            .Include(q => q.QuestionTopics).ThenInclude(qt => qt.Topic)
             .Include(q => q.QuestionLearningOutcomes).ThenInclude(ql => ql.LearningOutcome)
             .Where(q => questionIds.Contains(q.Id))
             .ToListAsync();
@@ -64,37 +60,13 @@ public class ExamBalanceCheckService : IExamBalanceCheckService
         {
             report.Warnings.Add(new BalanceWarningDto
             {
-                WarningType = "MissingTopic",
+                WarningType = "MissingOutcome",
                 Severity = "Critical",
                 Message = "Sınava hiç soru eklenmedi."
             });
             return report;
         }
 
-        // Konu kapsamı
-        var topicCoverage = questions
-            .SelectMany(q => q.QuestionTopics.Select(qt => qt.Topic))
-            .GroupBy(t => t.Id)
-            .Select(g => new
-            {
-                Topic = g.First(),
-                Count = g.Count()
-            })
-            .ToList();
-
-        foreach (var tc in topicCoverage)
-        {
-            report.TopicCoverage.Add(new TopicCoverageDto
-            {
-                TopicId = tc.Topic.Id,
-                WeekNumber = tc.Topic.WeekNumber,
-                TopicTitle = tc.Topic.Title,
-                QuestionCount = tc.Count,
-                Percentage = Math.Round((double)tc.Count / questions.Count * 100, 1)
-            });
-        }
-
-        // ÖÇ kapsamı
         var loCoverage = questions
             .SelectMany(q => q.QuestionLearningOutcomes.Select(ql => ql.LearningOutcome))
             .GroupBy(lo => lo.Id)
@@ -118,32 +90,32 @@ public class ExamBalanceCheckService : IExamBalanceCheckService
         }
 
         // ─── Uyarı kuralları ───
-        // 1) Tek konu yoğunluğu
-        var dominantTopic = report.TopicCoverage
+        // 1) Tek öğrenim çıktısı yoğunluğu
+        var dominantOutcome = report.LearningOutcomeCoverage
             .Where(t => t.Percentage > 50)
             .OrderByDescending(t => t.Percentage)
             .FirstOrDefault();
 
-        if (dominantTopic != null)
+        if (dominantOutcome != null)
         {
             report.Warnings.Add(new BalanceWarningDto
             {
                 WarningType = "Concentration",
                 Severity = "Warning",
-                Message = $"Soruların %{dominantTopic.Percentage:0.0}'i tek konuya yığılmış: " +
-                          $"Hafta {dominantTopic.WeekNumber} — {dominantTopic.TopicTitle}."
+                Message = $"Soruların %{dominantOutcome.Percentage:0.0}'i tek öğrenim çıktısına yığılmış: " +
+                          $"{dominantOutcome.Code} - {dominantOutcome.Name}."
             });
         }
 
-        // 2) Sadece 1-2 haftaya yığılmış mı?
-        if (report.TopicCoverage.Count <= 2 && questions.Count >= 4)
+        // 2) Sadece 1-2 öğrenim çıktısına yığılmış mı?
+        if (report.LearningOutcomeCoverage.Count <= 2 && questions.Count >= 4)
         {
-            var weeks = string.Join(", ", report.TopicCoverage.Select(t => $"Hafta {t.WeekNumber}").Distinct());
+            var outcomes = string.Join(", ", report.LearningOutcomeCoverage.Select(t => t.Code).Distinct());
             report.Warnings.Add(new BalanceWarningDto
             {
                 WarningType = "Concentration",
                 Severity = "Warning",
-                Message = $"Sorular sadece şu haftalardan: {weeks}. Daha geniş kapsam önerilir."
+                Message = $"Sorular sadece şu öğrenim çıktılarında yoğunlaşmış: {outcomes}. Daha geniş ÖÇ kapsamı önerilir."
             });
         }
 
@@ -193,7 +165,7 @@ public class ExamBalanceCheckService : IExamBalanceCheckService
         }
 
         // ─── Skorlama: Gini katsayısı ile dağılım eşitsizliği ───
-        var gini = ComputeGini(report.TopicCoverage.Select(t => (double)t.QuestionCount).ToList());
+        var gini = ComputeGini(report.LearningOutcomeCoverage.Select(t => (double)t.QuestionCount).ToList());
         report.DistributionInequality = Math.Round(gini, 3);
         report.BalanceScore = Math.Round((1.0 - gini) * 100, 1);
 

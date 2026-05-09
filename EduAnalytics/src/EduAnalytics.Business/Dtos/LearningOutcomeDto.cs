@@ -1,7 +1,7 @@
 namespace EduAnalytics.Business.Dtos;
 
 /// <summary>
-/// Ders Çıktısı (ÖÇ) görünümü.
+/// Öğrenim Çıktısı (ÖÇ) görünümü.
 /// </summary>
 public class LearningOutcomeDto
 {

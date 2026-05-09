@@ -2,6 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:EduAnalytics.UI.ViewModels"
+             xmlns:views="clr-namespace:EduAnalytics.UI.Views"
+             xmlns:mi="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              d:DataContext="{d:DesignInstance Type=vm:StudentManagementViewModel}"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
@@ -15,67 +17,61 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Başlık + Excel butonları -->
-        <Grid Grid.Row="0" Margin="0,0,0,16">
-            <StackPanel>
-                <TextBlock Text="👥 Öğrenci Yönetimi" Style="{StaticResource HeadingStyle}"/>
-                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}">
-                    Sistemde kayıtlı öğrencileri görüntüleyin, ekleyin, güncelleyin veya silin.
-                    Toplu yükleme için şablonu indirin, doldurun ve sisteme yükleyin.
+        <!-- Başlık + Eylemler -->
+        <Grid Grid.Row="0" Margin="0,0,0,18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Öğrenci Yönetimi" Style="{StaticResource HeadingStyle}"/>
+                <TextBlock TextWrapping="Wrap" Style="{StaticResource PageSubtitleStyle}">
+                    Sistemde kayıtlı öğrencileri görüntüleyin, ekleyin, güncelleyin veya silin. Toplu yükleme için şablonu indirin, doldurun ve sisteme yükleyin.
                 </TextBlock>
             </StackPanel>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <Button Content="📥 Şablon İndir"
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Content="Şablon İndir"
                         Command="{Binding DownloadTemplateCommand}"
-                        Background="#F3F4F6"
-                        Foreground="{StaticResource TextPrimaryBrush}"
-                        Padding="14,8"
-                        FontSize="13" FontWeight="SemiBold"
-                        BorderThickness="1" BorderBrush="{StaticResource BorderBrush}"
-                        Margin="0,0,8,0" Cursor="Hand"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Margin="0,0,8,0"
                         ToolTip="Boş Excel şablonunu indir"/>
-                <Button Content="📤 Excel'den Yükle"
+                <Button Content="Excel'den Yükle"
                         Command="{Binding ImportExcelCommand}"
-                        Background="{StaticResource PrimaryBrush}"
-                        Foreground="White"
-                        Padding="14,8"
-                        FontSize="13" FontWeight="SemiBold"
-                        BorderThickness="0" Cursor="Hand"
+                        Style="{StaticResource PrimaryButtonStyle}"
                         ToolTip="Doldurulmuş Excel'i sisteme yükle"/>
             </StackPanel>
         </Grid>
 
         <!-- Mesajlar -->
         <StackPanel Grid.Row="1" Margin="0,0,0,12">
-            <Border Background="#FEE2E2" BorderBrush="{StaticResource DangerBrush}" BorderThickness="1"
-                    CornerRadius="4" Padding="12,8" Margin="0,0,0,4"
+            <Border Style="{StaticResource AlertErrorStyle}"
+                    Margin="0,0,0,6"
                     Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}">
                 <TextBlock Text="{Binding ErrorMessage}" Foreground="#991B1B" TextWrapping="Wrap"/>
             </Border>
-            <Border Background="#D1FAE5" BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1"
-                    CornerRadius="4" Padding="12,8"
+            <Border Style="{StaticResource AlertSuccessStyle}"
                     Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}">
-                <TextBlock Text="{Binding SuccessMessage}" Foreground="#064E3B" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding SuccessMessage}" Foreground="#065F46" TextWrapping="Wrap"/>
             </Border>
         </StackPanel>
 
-        <!-- Form: Yeni öğrenci / düzenle -->
-        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+        <!-- Form -->
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}">
             <StackPanel>
                 <TextBlock Style="{StaticResource SubheadingStyle}">
-                    <Run Text="✏ "/>
                     <Run Text="{Binding EditingStudent.StudentNumber, FallbackValue='Yeni Öğrenci'}"/>
                 </TextBlock>
 
-                <Grid Margin="0,8,0,0">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="14"/>
                         <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="14"/>
                         <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="14"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
@@ -83,36 +79,25 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Öğrenci No" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Ad Soyad" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                    <TextBlock Grid.Row="0" Grid.Column="4" Text="Sınıf / Bölüm" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Öğrenci No" Style="{StaticResource LabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Ad Soyad" Style="{StaticResource LabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="4" Text="Sınıf / Bölüm" Style="{StaticResource LabelStyle}"/>
 
                     <TextBox Grid.Row="1" Grid.Column="0"
-                             Text="{Binding FormStudentNumber, UpdateSourceTrigger=PropertyChanged}"
-                             Padding="8,6"/>
+                             Text="{Binding FormStudentNumber, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBox Grid.Row="1" Grid.Column="2"
-                             Text="{Binding FormFullName, UpdateSourceTrigger=PropertyChanged}"
-                             Padding="8,6"/>
+                             Text="{Binding FormFullName, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBox Grid.Row="1" Grid.Column="4"
-                             Text="{Binding FormClassName, UpdateSourceTrigger=PropertyChanged}"
-                             Padding="8,6"/>
+                             Text="{Binding FormClassName, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <StackPanel Grid.Row="1" Grid.Column="6" Orientation="Horizontal">
-                        <Button Content="💾 Kaydet"
+                        <Button Content="Kaydet"
                                 Command="{Binding SaveCommand}"
-                                Background="{StaticResource PrimaryBrush}"
-                                Foreground="White"
-                                Padding="16,6"
-                                BorderThickness="0"
-                                Cursor="Hand" FontWeight="SemiBold"
+                                Style="{StaticResource PrimaryButtonStyle}"
                                 Margin="0,0,6,0"/>
-                        <Button Content="✕ Temizle"
+                        <Button Content="Temizle"
                                 Command="{Binding StartNewCommand}"
-                                Background="#F3F4F6"
-                                Foreground="{StaticResource TextSecondaryBrush}"
-                                Padding="14,6"
-                                BorderThickness="1" BorderBrush="{StaticResource BorderBrush}"
-                                Cursor="Hand"/>
+                                Style="{StaticResource SecondaryButtonStyle}"/>
                     </StackPanel>
                 </Grid>
             </StackPanel>
@@ -126,49 +111,29 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0" Margin="0,0,0,8">
+                <Grid Grid.Row="0" Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="🔍" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <TextBox Grid.Column="1"
+                    <TextBox Grid.Column="0"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                             Padding="8,6"
                              ToolTip="Numara, ad-soyad veya sınıf adında ara"/>
-                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="12,0,0,0"
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Margin="14,0,0,0"
                                Foreground="{StaticResource TextSecondaryBrush}">
-                        <Run Text="Toplam:"/>
-                        <Run Text="{Binding FilteredStudents.Count, Mode=OneWay}" FontWeight="Bold"/>
+                        <Run Text="Toplam: "/>
+                        <Run Text="{Binding FilteredStudents.Count, Mode=OneWay}"
+                             FontWeight="SemiBold"
+                             Foreground="{StaticResource TextPrimaryBrush}"/>
                     </TextBlock>
                 </Grid>
 
-                <DataGrid Grid.Row="1"
-                          ItemsSource="{Binding FilteredStudents}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          GridLinesVisibility="Horizontal"
-                          HeadersVisibility="Column"
-                          Background="Transparent"
-                          BorderBrush="{StaticResource BorderBrush}"
-                          BorderThickness="1"
-                          RowHeight="44"
-                          ColumnHeaderHeight="40"
-                          CanUserAddRows="False" CanUserDeleteRows="False">
-                    <DataGrid.Resources>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="Padding" Value="10,6"/>
-                            <Setter Property="VerticalAlignment" Value="Center"/>
-                        </Style>
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Padding" Value="10,8"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                        </Style>
-                    </DataGrid.Resources>
+                <DataGrid Grid.Row="1" ItemsSource="{Binding FilteredStudents}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Numara" Binding="{Binding StudentNumber}" Width="120"/>
-                        <DataGridTextColumn Header="Ad Soyad" Binding="{Binding FullName}" Width="*" MinWidth="200"/>
+                        <DataGridTextColumn Header="Ad Soyad" Binding="{Binding FullName}" Width="*" MinWidth="220"/>
                         <DataGridTextColumn Header="Sınıf / Bölüm" Binding="{Binding ClassName}" Width="220"/>
                         <DataGridTextColumn Header="Kayıtlı Ders" Binding="{Binding EnrolledCourseCount}" Width="120">
                             <DataGridTextColumn.ElementStyle>
@@ -178,43 +143,47 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTemplateColumn Header="İşlem" Width="160">
+                        <DataGridTemplateColumn Header="" Width="180">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Button Content="✏ Düzenle"
+                                        <Button Content="Düzenle"
                                                 Command="{Binding DataContext.StartEditCommand,
                                                           RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}"
-                                                Background="#E0E7FF"
-                                                Foreground="#3730A3"
-                                                BorderThickness="0"
-                                                Padding="8,4" Margin="0,0,4,0"
-                                                Cursor="Hand" FontSize="11"/>
-                                        <Button Content="🗑 Sil"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                Padding="10,4"
+                                                FontSize="11"
+                                                Margin="0,0,6,0"/>
+                                        <Button Content="Sil"
                                                 Command="{Binding DataContext.DeleteCommand,
                                                           RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}"
-                                                Background="Transparent"
-                                                Foreground="{StaticResource DangerBrush}"
-                                                BorderBrush="{StaticResource DangerBrush}"
-                                                BorderThickness="1"
-                                                Padding="8,4"
-                                                Cursor="Hand" FontSize="11"/>
+                                                Style="{StaticResource DangerButtonStyle}"
+                                                Padding="10,4"
+                                                FontSize="11"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
+
+                <StackPanel Grid.Row="1"
+                            Style="{StaticResource EmptyStateStyle}"
+                            Visibility="{Binding FilteredStudents.Count, Converter={StaticResource CollectionEmptyToVisibility}}">
+                    <mi:MaterialIcon Kind="AccountGroupOutline" Width="48" Height="48"
+                                     Foreground="{StaticResource SubtleBrush}"
+                                     HorizontalAlignment="Center"/>
+                    <TextBlock Text="Öğrenci bulunamadı" Style="{StaticResource EmptyStateTitleStyle}"/>
+                    <TextBlock Text="Yukarıdaki formu kullanarak yeni öğrenci ekleyin veya Excel ile toplu yükleyin."
+                               Style="{StaticResource EmptyStateDescriptionStyle}"/>
+                </StackPanel>
             </Grid>
         </Border>
 
         <!-- Loading overlay -->
-        <Border Grid.Row="0" Grid.RowSpan="4" Background="#80FFFFFF"
-                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
-            <TextBlock Text="Yükleniyor..." HorizontalAlignment="Center" VerticalAlignment="Center"
-                       FontSize="18" Foreground="{StaticResource PrimaryBrush}"/>
-        </Border>
+        <views:LoadingOverlay Grid.Row="0" Grid.RowSpan="4"
+                              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
     </Grid>
 </UserControl>

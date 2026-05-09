@@ -1,14 +1,15 @@
 <UserControl x:Class="EduAnalytics.UI.Views.LoadingOverlay"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="#B3FFFFFF"
+             x:Name="Root"
+             Background="#80111827"
              IsHitTestVisible="True">
     <UserControl.Resources>
         <Storyboard x:Key="SpinAnim" RepeatBehavior="Forever">
             <DoubleAnimation
                 Storyboard.TargetName="SpinnerArc"
                 Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
-                From="0" To="360" Duration="0:0:1"/>
+                From="0" To="360" Duration="0:0:0.9"/>
         </Storyboard>
     </UserControl.Resources>
 
@@ -19,23 +20,22 @@
     </UserControl.Triggers>
 
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Grid Width="36" Height="36">
-            <!-- Arka halka -->
-            <Ellipse Stroke="{StaticResource BorderBrush}" StrokeThickness="3"/>
-            <!-- Dönen yay -->
+        <Grid Width="42" Height="42">
+            <Ellipse Stroke="#FFFFFF22" StrokeThickness="3"/>
             <Ellipse x:Name="SpinnerArc"
                      Stroke="{StaticResource PrimaryBrush}" StrokeThickness="3"
-                     StrokeDashArray="4 6"
+                     StrokeDashArray="5 8"
                      RenderTransformOrigin="0.5,0.5">
                 <Ellipse.RenderTransform>
                     <RotateTransform Angle="0"/>
                 </Ellipse.RenderTransform>
             </Ellipse>
         </Grid>
-        <TextBlock Text="Yükleniyor..."
-                   Margin="0,12,0,0"
+        <TextBlock Text="{Binding Message, ElementName=Root}"
+                   Margin="0,14,0,0"
                    FontSize="13"
-                   Foreground="{StaticResource TextSecondaryBrush}"
+                   FontWeight="SemiBold"
+                   Foreground="#E2E8F0"
                    HorizontalAlignment="Center"/>
     </StackPanel>
 </UserControl>

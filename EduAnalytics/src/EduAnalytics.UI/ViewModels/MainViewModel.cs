@@ -37,11 +37,11 @@ public partial class MainViewModel : ObservableObject
             case DashboardViewModel d:
                 d.OpenAnalysisRequested -= OnOpenAnalysisRequested;
                 break;
-            case ExamCreateViewModel ec:
-                ec.ExamSaved -= OnExamSaved;
-                break;
             case ExamFromBankViewModel efb:
                 efb.ExamSaved -= OnExamSaved;
+                break;
+            case ExamManagementViewModel em:
+                em.OpenAnalysisRequested -= OnOpenAnalysisRequested;
                 break;
             case ExamAnalysisViewModel ea:
                 ea.OpenAnswerEntryRequested -= OnOpenAnswerEntryRequested;
@@ -70,23 +70,23 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void NavigateToCreateExam()
-    {
-        DetachCurrentView();
-        ActiveMenu = "CreateExam";
-        var vm = _services.GetRequiredService<ExamCreateViewModel>();
-        vm.ExamSaved += OnExamSaved;
-        _ = vm.LoadAsync();
-        CurrentView = vm;
-    }
-
-    [RelayCommand]
     private void NavigateToExamFromBank()
     {
         DetachCurrentView();
         ActiveMenu = "ExamFromBank";
         var vm = _services.GetRequiredService<ExamFromBankViewModel>();
         vm.ExamSaved += OnExamSaved;
+        _ = vm.LoadAsync();
+        CurrentView = vm;
+    }
+
+    [RelayCommand]
+    private void NavigateToExamManagement()
+    {
+        DetachCurrentView();
+        ActiveMenu = "ExamManagement";
+        var vm = _services.GetRequiredService<ExamManagementViewModel>();
+        vm.OpenAnalysisRequested += OnOpenAnalysisRequested;
         _ = vm.LoadAsync();
         CurrentView = vm;
     }
@@ -114,8 +114,6 @@ public partial class MainViewModel : ObservableObject
 
     private void OnQuestionCreateRequested()
     {
-        // Change from NavigateToCreateExam() to open a specific single question creation page.
-        // It looks like SingleQuestionCreateViewModel is needed here
         DetachCurrentView();
         ActiveMenu = "SingleQuestionCreate";
         var vm = _services.GetRequiredService<SingleQuestionCreateViewModel>();

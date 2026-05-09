@@ -9,8 +9,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:conv="clr-namespace:EduAnalytics.UI.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="900" d:DesignWidth="1000"
-             Background="{StaticResource PageBgBrush}">
+             d:DesignHeight="900" d:DesignWidth="1000">
 
     <UserControl.Resources>
         <ObjectDataProvider x:Key="QuestionTypeValues"
@@ -19,7 +18,12 @@
                 <x:Type TypeName="enums:QuestionType"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-        <conv:ContainsLearningOutcomeConverter x:Key="ContainsLoConverter"/>
+        <Style x:Key="OptionLabelStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -28,63 +32,60 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="Yeni Soru Olustur" Style="{StaticResource HeadingStyle}"/>
-            <TextBlock Text="Tek bir soru veya ortak govdeli (iliskili) bir soru grubu ekleyebilirsiniz." Foreground="{StaticResource TextSecondaryBrush}"/>
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Yeni Soru Oluştur" Style="{StaticResource HeadingStyle}"/>
+            <TextBlock Text="Tek bir soru veya ortak gövdeli (ilişkili) bir soru grubu ekleyebilirsiniz."
+                       Style="{StaticResource PageSubtitleStyle}"/>
         </StackPanel>
 
-        <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0">
+        <TabControl Grid.Row="1">
 
             <!-- ═══ Sekme 1: Tek Soru ═══ -->
-            <TabItem Header="\uD83D\uDCDD Tek Soru">
-                <Grid Margin="0,12,0,0">
+            <TabItem Header="Tek Soru">
+                <Grid Margin="0,16,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
-                        <StackPanel Margin="0,0,0,20">
+                        <StackPanel Margin="0,0,0,16">
+
+                            <!-- Temel Bilgiler -->
                             <Border Style="{StaticResource CardStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="Temel Bilgiler" Style="{StaticResource SubheadingStyle}"/>
-
-                                    <Grid Margin="0,8,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Ders Secimi" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                        <ComboBox Grid.Row="1" Grid.Column="0"
-                                                  ItemsSource="{Binding Courses}"
-                                                  SelectedItem="{Binding SelectedCourse}"
-                                                  DisplayMemberPath="Name"
-                                                  Padding="8,6" FontSize="14"
-                                                  Margin="0,0,0,16"/>
-                                    </Grid>
+                                    <TextBlock Text="Temel Bilgiler" Style="{StaticResource CardHeaderStyle}"/>
+                                    <TextBlock Text="Ders" Style="{StaticResource LabelStyle}"/>
+                                    <ComboBox ItemsSource="{Binding Courses}"
+                                              SelectedItem="{Binding SelectedCourse}"
+                                              DisplayMemberPath="Name"/>
                                 </StackPanel>
                             </Border>
 
-                            <!-- Question Editor Section -->
-                            <Border Style="{StaticResource CardStyle}" Padding="16" Margin="0,16,0,0" DataContext="{Binding Question}">
+                            <!-- Soru Detayı -->
+                            <Border Style="{StaticResource CardStyle}" DataContext="{Binding Question}">
                                 <StackPanel>
-                                    <Grid Margin="0,0,0,12">
+                                    <Grid Margin="0,0,0,14">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="16"/>
-                                            <ColumnDefinition Width="140"/>
-                                            <ColumnDefinition Width="16"/>
-                                            <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="160"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="6"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="16" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" Text="Soru Detayi" />
+                                        <TextBlock Grid.Column="0"
+                                                   VerticalAlignment="Center"
+                                                   Text="Soru Detayı"
+                                                   Style="{StaticResource CardHeaderStyle}"
+                                                   Margin="0"/>
 
-                                        <ComboBox Grid.Column="2" ItemsSource="{Binding Source={StaticResource QuestionTypeValues}}" SelectedItem="{Binding Type}" Padding="8,4" VerticalAlignment="Center">
+                                        <ComboBox Grid.Column="2"
+                                                  ItemsSource="{Binding Source={StaticResource QuestionTypeValues}}"
+                                                  SelectedItem="{Binding Type}"
+                                                  VerticalAlignment="Center">
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate>
                                                     <TextBlock>
@@ -106,116 +107,138 @@
                                             </ComboBox.ItemTemplate>
                                         </ComboBox>
 
-                                        <TextBlock Grid.Column="4" Text="Puan:" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                                        <TextBox Grid.Column="5" Text="{Binding MaxPoints, UpdateSourceTrigger=PropertyChanged}" Width="60" Padding="6,4" VerticalAlignment="Center" Margin="6,0,0,0" HorizontalAlignment="Left"/>
+                                        <TextBlock Grid.Column="4"
+                                                   Text="Puan"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold"/>
+                                        <TextBox Grid.Column="6"
+                                                 Text="{Binding MaxPoints, UpdateSourceTrigger=PropertyChanged}"
+                                                 Width="80"
+                                                 VerticalAlignment="Center"/>
                                     </Grid>
 
-                                    <TextBlock Text="Soru Metni" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding QuestionText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" Padding="8,6" Margin="0,0,0,12"/>
+                                    <TextBlock Text="Soru Metni" Style="{StaticResource LabelStyle}"/>
+                                    <TextBox Text="{Binding QuestionText, UpdateSourceTrigger=PropertyChanged}"
+                                             AcceptsReturn="True"
+                                             TextWrapping="Wrap"
+                                             MinHeight="72"
+                                             VerticalContentAlignment="Top"
+                                             Margin="0,0,0,16"/>
 
+                                    <!-- Çoktan Seçmeli -->
                                     <StackPanel Visibility="{Binding IsMultipleChoice, Converter={StaticResource BoolToVisibility}}">
-                                        <TextBlock Text="Siklar" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                        <TextBlock Text="Şıklar" Style="{StaticResource LabelStyle}"/>
 
-                                        <Grid Margin="0,0,0,4">
+                                        <Grid Margin="0,0,0,8">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="32"/>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="10"/>
-                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="14"/>
+                                                <ColumnDefinition Width="32"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="A)" VerticalAlignment="Center" FontWeight="Bold"/>
-                                            <TextBox Grid.Column="1" Text="{Binding OptionA, UpdateSourceTrigger=PropertyChanged}" Padding="6,4"/>
-                                            <TextBlock Grid.Column="3" Text="B)" VerticalAlignment="Center" FontWeight="Bold"/>
-                                            <TextBox Grid.Column="4" Text="{Binding OptionB, UpdateSourceTrigger=PropertyChanged}" Padding="6,4"/>
+                                            <TextBlock Grid.Column="0" Text="A" Style="{StaticResource OptionLabelStyle}"/>
+                                            <TextBox Grid.Column="1" Text="{Binding OptionA, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBlock Grid.Column="3" Text="B" Style="{StaticResource OptionLabelStyle}"/>
+                                            <TextBox Grid.Column="4" Text="{Binding OptionB, UpdateSourceTrigger=PropertyChanged}"/>
                                         </Grid>
 
-                                        <Grid Margin="0,0,0,10">
+                                        <Grid Margin="0,0,0,8">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="32"/>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="10"/>
-                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="14"/>
+                                                <ColumnDefinition Width="32"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="C)" VerticalAlignment="Center" FontWeight="Bold"/>
-                                            <TextBox Grid.Column="1" Text="{Binding OptionC, UpdateSourceTrigger=PropertyChanged}" Padding="6,4"/>
-                                            <TextBlock Grid.Column="3" Text="D)" VerticalAlignment="Center" FontWeight="Bold"/>
-                                            <TextBox Grid.Column="4" Text="{Binding OptionD, UpdateSourceTrigger=PropertyChanged}" Padding="6,4"/>
+                                            <TextBlock Grid.Column="0" Text="C" Style="{StaticResource OptionLabelStyle}"/>
+                                            <TextBox Grid.Column="1" Text="{Binding OptionC, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBlock Grid.Column="3" Text="D" Style="{StaticResource OptionLabelStyle}"/>
+                                            <TextBox Grid.Column="4" Text="{Binding OptionD, UpdateSourceTrigger=PropertyChanged}"/>
                                         </Grid>
 
-                                        <Grid Margin="0,0,0,10">
+                                        <Grid Margin="0,0,0,16">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="32"/>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="10"/>
-                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="14"/>
+                                                <ColumnDefinition Width="32"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="E)" VerticalAlignment="Center" FontWeight="Bold"/>
-                                            <TextBox Grid.Column="1" Text="{Binding OptionE, UpdateSourceTrigger=PropertyChanged}" Padding="6,4"/>
+                                            <TextBlock Grid.Column="0" Text="E" Style="{StaticResource OptionLabelStyle}"/>
+                                            <TextBox Grid.Column="1" Text="{Binding OptionE, UpdateSourceTrigger=PropertyChanged}"/>
                                         </Grid>
 
-                                        <TextBlock Text="Dogru Sik" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                            <RadioButton Content="A" Margin="0,0,16,0" FontWeight="Bold" IsChecked="{Binding CorrectOption, Converter={StaticResource EnumEquals}, ConverterParameter=A}"/>
-                                            <RadioButton Content="B" Margin="0,0,16,0" FontWeight="Bold" IsChecked="{Binding CorrectOption, Converter={StaticResource EnumEquals}, ConverterParameter=B}"/>
-                                            <RadioButton Content="C" Margin="0,0,16,0" FontWeight="Bold" IsChecked="{Binding CorrectOption, Converter={StaticResource EnumEquals}, ConverterParameter=C}"/>
-                                            <RadioButton Content="D" Margin="0,0,16,0" FontWeight="Bold" IsChecked="{Binding CorrectOption, Converter={StaticResource EnumEquals}, ConverterParameter=D}"/>
-                                            <RadioButton Content="E" Margin="0,0,16,0" FontWeight="Bold" IsChecked="{Binding CorrectOption, Converter={StaticResource EnumEquals}, ConverterParameter=E}"/>
+                                        <TextBlock Text="Doğru Şık" Style="{StaticResource LabelStyle}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <RadioButton Content="A" Margin="0,0,20,0" IsChecked="{Binding CorrectOption, Converter={StaticResource EnumEquals}, ConverterParameter=A}"/>
+                                            <RadioButton Content="B" Margin="0,0,20,0" IsChecked="{Binding CorrectOption, Converter={StaticResource EnumEquals}, ConverterParameter=B}"/>
+                                            <RadioButton Content="C" Margin="0,0,20,0" IsChecked="{Binding CorrectOption, Converter={StaticResource EnumEquals}, ConverterParameter=C}"/>
+                                            <RadioButton Content="D" Margin="0,0,20,0" IsChecked="{Binding CorrectOption, Converter={StaticResource EnumEquals}, ConverterParameter=D}"/>
+                                            <RadioButton Content="E" IsChecked="{Binding CorrectOption, Converter={StaticResource EnumEquals}, ConverterParameter=E}"/>
                                         </StackPanel>
                                     </StackPanel>
 
+                                    <!-- Klasik -->
                                     <StackPanel Visibility="{Binding IsOpenEnded, Converter={StaticResource BoolToVisibility}}">
-                                        <TextBlock Text="Cevap Anahtari / Notlandirma Rehberi" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                        <TextBox Text="{Binding AnswerKey, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" Padding="8,6" Margin="0,0,0,12"/>
+                                        <TextBlock Text="Cevap Anahtarı / Notlandırma Rehberi" Style="{StaticResource LabelStyle}"/>
+                                        <TextBox Text="{Binding AnswerKey, UpdateSourceTrigger=PropertyChanged}"
+                                                 AcceptsReturn="True"
+                                                 TextWrapping="Wrap"
+                                                 MinHeight="72"
+                                                 VerticalContentAlignment="Top"/>
                                     </StackPanel>
+                                </StackPanel>
+                            </Border>
 
-                                    <!-- Yeni: Öğrenim Çıktıları (ÖÇ) seçimi - multi-select with filter and checkboxes -->
-                                    <TextBlock Text="Öğrenim Çıktıları (ÖÇ)" FontWeight="SemiBold" Margin="12,12,0,4"/>
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
+                            <!-- Öğrenim Çıktıları -->
+                            <Border Style="{StaticResource CardStyle}" DataContext="{Binding Question}">
+                                <StackPanel>
+                                    <TextBlock Text="Öğrenim Çıktıları" Style="{StaticResource CardHeaderStyle}"/>
+                                    <TextBlock Text="Bu soruyla ilişkilendirilecek öğrenim çıktılarını seçin."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Margin="0,-8,0,12"/>
 
-                                        <!-- Arama kutusu -->
-                                        <TextBox x:Name="LoFilterTextBox" Grid.Row="0" Margin="0,0,0,8" Padding="8,6" TextChanged="LoFilterTextBox_TextChanged" />
+                                    <TextBox Text="{Binding LearningOutcomeFilter, UpdateSourceTrigger=PropertyChanged}"
+                                             Margin="0,0,0,10"
+                                             ToolTip="Kod veya isim ile filtreleyin"/>
 
-                                        <Grid Grid.Row="1">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                                    <Border BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            MinHeight="160"
+                                            Margin="0,0,0,12">
+                                        <ListBox ItemsSource="{Binding LearningOutcomesView}"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 Padding="6">
+                                            <ListBox.ItemContainerStyle>
+                                                <Style TargetType="ListBoxItem">
+                                                    <Setter Property="Padding" Value="0"/>
+                                                    <Setter Property="Margin" Value="0,2"/>
+                                                </Style>
+                                            </ListBox.ItemContainerStyle>
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" Padding="6">
+                                                        <StackPanel>
+                                                            <TextBlock FontWeight="SemiBold"
+                                                                       FontSize="12"
+                                                                       Foreground="{StaticResource PrimaryBrush}"
+                                                                       Text="{Binding Code}"/>
+                                                            <TextBlock Text="{Binding Name}"
+                                                                       FontSize="12"
+                                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                                       Margin="0,2,0,0"/>
+                                                        </StackPanel>
+                                                    </CheckBox>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Border>
 
-                                            <!-- Çoklu seçime izin veren ListBox -->
-                                            <ListBox x:Name="LoListBox" Grid.Column="0" ItemsSource="{Binding AvailableLearningOutcomes}" SelectionMode="Extended" Padding="6" MinHeight="120">
-                                                <ListBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <CheckBox Checked="LoCheckBox_Checked" Unchecked="LoCheckBox_Unchecked" Padding="6">
-                                                            <CheckBox.IsChecked>
-                                                                <MultiBinding Converter="{StaticResource ContainsLoConverter}" Mode="OneWay">
-                                                                    <Binding Path="DataContext.SelectedLearningOutcomes" ElementName="LoListBox" />
-                                                                    <Binding />
-                                                                </MultiBinding>
-                                                            </CheckBox.IsChecked>
-                                                            <CheckBox.Content>
-                                                                <StackPanel>
-                                                                    <TextBlock FontWeight="Bold" Text="{Binding Code}"/>
-                                                                    <TextBlock Text="{Binding Name}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                                                </StackPanel>
-                                                            </CheckBox.Content>
-                                                        </CheckBox>
-                                                    </DataTemplate>
-                                                </ListBox.ItemTemplate>
-                                            </ListBox>
-
-                                            <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Top" Margin="8,0,0,0">
-                                                <Button Content="+ Ekle" Click="AddSelectedLearningOutcomes_Click" Background="{StaticResource SuccessBrush}" Foreground="White" Padding="12,6" BorderThickness="0" Cursor="Hand"/>
-                                                <Button Content="Seçiliyi Kaldır" Click="RemoveSelectedLearningOutcomes_Click" Background="Transparent" Foreground="{StaticResource DangerBrush}" BorderBrush="{StaticResource DangerBrush}" BorderThickness="1" Padding="8,4" Margin="0,8,0,0" Cursor="Hand"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Grid>
+                                    <TextBlock Text="Seçili Çıktılar" Style="{StaticResource LabelStyle}"
+                                               Visibility="{Binding SelectedLearningOutcomes.Count, Converter={StaticResource BoolToVisibility}}"/>
 
                                     <ItemsControl ItemsSource="{Binding SelectedLearningOutcomes}">
                                         <ItemsControl.ItemsPanel>
@@ -225,13 +248,33 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Background="#FEF3C7" CornerRadius="4" Padding="8,4" Margin="0,0,6,6">
-                                                    <StackPanel Orientation="Horizontal">
+                                                <Border Background="{StaticResource PrimaryLightBrush}"
+                                                        BorderBrush="{StaticResource PrimaryBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="6"
+                                                        Padding="8,5"
+                                                        Margin="0,0,6,6">
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                         <StackPanel>
-                                                            <TextBlock Foreground="#92400E" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Text="{Binding Code}"/>
-                                                            <TextBlock Foreground="#92400E" FontSize="12" VerticalAlignment="Center" Text="{Binding Name}"/>
+                                                            <TextBlock Foreground="{StaticResource PrimaryDarkBrush}"
+                                                                       FontSize="11"
+                                                                       FontWeight="SemiBold"
+                                                                       Text="{Binding Code}"/>
+                                                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}"
+                                                                       FontSize="11"
+                                                                       Text="{Binding Name}"/>
                                                         </StackPanel>
-                                                        <Button Content="x" Command="{Binding DataContext.RemoveLearningOutcomeCommand, RelativeSource={RelativeSource AncestorType=Border, AncestorLevel=2}}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Foreground="#92400E" Margin="8,0,0,0" Padding="2,0" Cursor="Hand" FontWeight="Bold"/>
+                                                        <Button Content="✕"
+                                                                Command="{Binding DataContext.RemoveLearningOutcomeCommand,
+                                                                          RelativeSource={RelativeSource AncestorType=Border, AncestorLevel=2}}"
+                                                                CommandParameter="{Binding}"
+                                                                Style="{StaticResource GhostButtonStyle}"
+                                                                Foreground="{StaticResource PrimaryDarkBrush}"
+                                                                Padding="6,2"
+                                                                FontSize="11"
+                                                                FontWeight="Bold"
+                                                                Margin="8,0,0,0"
+                                                                VerticalAlignment="Center"/>
                                                     </StackPanel>
                                                 </Border>
                                             </DataTemplate>
@@ -242,8 +285,12 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!-- Footer With Save -->
-                    <Border Grid.Row="1" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,12,0,0">
+                    <!-- Footer -->
+                    <Border Grid.Row="1"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="0,1,0,0"
+                            Padding="0,14,0,0"
+                            Margin="0,8,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -251,23 +298,32 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                <Border Background="#FEE2E2" BorderBrush="{StaticResource DangerBrush}" BorderThickness="1" CornerRadius="4" Padding="12,8" Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}">
+                                <Border Style="{StaticResource AlertErrorStyle}"
+                                        Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}">
                                     <TextBlock Text="{Binding ErrorMessage}" Foreground="#991B1B" TextWrapping="Wrap"/>
                                 </Border>
-                                <Border Background="#D1FAE5" BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1" CornerRadius="4" Padding="12,8" Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}">
-                                    <TextBlock Text="{Binding SuccessMessage}" Foreground="#064E3B" TextWrapping="Wrap"/>
+                                <Border Style="{StaticResource AlertSuccessStyle}"
+                                        Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}">
+                                    <TextBlock Text="{Binding SuccessMessage}" Foreground="#065F46" TextWrapping="Wrap"/>
                                 </Border>
                             </StackPanel>
 
-                            <Button Grid.Column="1" Content="\uD83D\uDCBE Kaydet" Command="{Binding SaveCommand}" IsEnabled="{Binding IsSaving, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}" Background="{StaticResource PrimaryBrush}" Foreground="White" Padding="24,12" FontSize="14" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand" Margin="16,0,0,0"/>
+                            <Button Grid.Column="1"
+                                    Content="Kaydet"
+                                    Command="{Binding SaveCommand}"
+                                    IsEnabled="{Binding IsSaving, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Padding="28,12"
+                                    FontSize="14"
+                                    Margin="20,0,0,0"/>
                         </Grid>
                     </Border>
                 </Grid>
             </TabItem>
 
-            <!-- ═══ Sekme 2: İlişkili (Common-Stem) Soru ═══ -->
-            <TabItem Header="\uD83D\uDD17 İlişkili Soru">
-                <ContentControl Content="{Binding GroupEditor}" Margin="0,12,0,0">
+            <!-- ═══ Sekme 2: İlişkili Soru ═══ -->
+            <TabItem Header="İlişkili Soru">
+                <ContentControl Content="{Binding GroupEditor}" Margin="0,16,0,0">
                     <ContentControl.ContentTemplate>
                         <DataTemplate DataType="{x:Type vm:QuestionGroupEditorViewModel}">
                             <views:QuestionGroupEditorView/>

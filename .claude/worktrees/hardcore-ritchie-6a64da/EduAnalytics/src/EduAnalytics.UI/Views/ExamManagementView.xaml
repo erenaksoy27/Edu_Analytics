@@ -1,0 +1,242 @@
+<UserControl x:Class="EduAnalytics.UI.Views.ExamManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:EduAnalytics.UI.ViewModels"
+             xmlns:enums="clr-namespace:EduAnalytics.Core.Enums;assembly=EduAnalytics.Core"
+             d:DataContext="{d:DesignInstance Type=vm:ExamManagementViewModel}"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Başlık -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Sınav Yönetimi" Style="{StaticResource HeadingStyle}"/>
+            <TextBlock Text="Tüm sınavları görüntüleyin, düzenleyin veya silin."
+                       Foreground="{StaticResource TextSecondaryBrush}"/>
+        </StackPanel>
+
+        <!-- Mesajlar -->
+        <StackPanel Grid.Row="1">
+            <Border Background="#FEE2E2" BorderBrush="{StaticResource DangerBrush}" BorderThickness="1"
+                    CornerRadius="4" Padding="12,8" Margin="0,0,0,8"
+                    Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="#991B1B" TextWrapping="Wrap"/>
+            </Border>
+            <Border Background="#D1FAE5" BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1"
+                    CornerRadius="4" Padding="12,8" Margin="0,0,0,8"
+                    Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding SuccessMessage}" Foreground="#064E3B" TextWrapping="Wrap"/>
+            </Border>
+        </StackPanel>
+
+        <!-- Sınav listesi -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Exams}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource CardStyle}" Padding="16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Sol: bilgi -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{Binding Title}"
+                                               FontSize="16" FontWeight="Bold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                        <Border Background="#DBEAFE" CornerRadius="3" Padding="6,2" Margin="0,0,6,0">
+                                            <TextBlock Text="{Binding ExamType}" Foreground="#1E3A8A"
+                                                       FontSize="11" FontWeight="SemiBold"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding CourseName}"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Text=" · " Foreground="{StaticResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding ExamDate, StringFormat='{}{0:dd.MM.yyyy}'}"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Text=" · " Foreground="{StaticResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Foreground="{StaticResource TextSecondaryBrush}">
+                                            <Run Text="{Binding DurationMinutes}"/>
+                                            <Run Text="dk"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Soru/Cevap metrikleri -->
+                                <StackPanel Grid.Column="1" Margin="16,0,8,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding TotalQuestions}"
+                                               FontSize="20" FontWeight="Bold"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="SORU" FontSize="10"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Margin="8,0,16,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding TotalAnswers}"
+                                               FontSize="20" FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{StaticResource PrimaryBrush}"/>
+                                    <TextBlock Text="CEVAP" FontSize="10"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Aksiyon: Analiz -->
+                                <Button Grid.Column="3"
+                                        Content="📊 Analiz"
+                                        Command="{Binding DataContext.OpenAnalysisCommand,
+                                                  RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Background="#F3F4F6"
+                                        Foreground="{StaticResource TextPrimaryBrush}"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        Padding="12,6"
+                                        Cursor="Hand"
+                                        Margin="0,0,6,0"
+                                        FontSize="12"/>
+
+                                <!-- Aksiyon: Düzenle / Sil -->
+                                <StackPanel Grid.Column="4" Orientation="Horizontal">
+                                    <Button Content="✎ Düzenle"
+                                            Command="{Binding DataContext.EditCommand,
+                                                      RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Background="{StaticResource PrimaryBrush}"
+                                            Foreground="White"
+                                            BorderThickness="0"
+                                            Padding="12,6"
+                                            Cursor="Hand"
+                                            Margin="0,0,6,0"
+                                            FontSize="12"/>
+
+                                    <Button Content="🗑"
+                                            Command="{Binding DataContext.DeleteCommand,
+                                                      RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Background="Transparent"
+                                            Foreground="{StaticResource DangerBrush}"
+                                            BorderBrush="{StaticResource DangerBrush}"
+                                            BorderThickness="1"
+                                            Padding="10,6"
+                                            Cursor="Hand"
+                                            FontSize="13"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Boş durum -->
+        <Border Grid.Row="2"
+                Visibility="{Binding Exams.Count, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}"
+                VerticalAlignment="Center" HorizontalAlignment="Center">
+            <StackPanel>
+                <TextBlock Text="📋" FontSize="48" HorizontalAlignment="Center" Foreground="#D1D5DB"/>
+                <TextBlock Text="Henüz sınav yok"
+                           HorizontalAlignment="Center" FontSize="16"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Margin="0,12,0,0"/>
+                <TextBlock Text="'Yeni Sınav Oluştur' veya 'Bankadan Sınav' ekranından sınav ekleyin."
+                           HorizontalAlignment="Center" FontSize="12"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Yükleniyor overlay -->
+        <Border Grid.RowSpan="3" Background="#80FFFFFF"
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="Yükleniyor..." HorizontalAlignment="Center" VerticalAlignment="Center"
+                       FontSize="18" Foreground="{StaticResource PrimaryBrush}"/>
+        </Border>
+
+        <!-- ═══ DÜZENLE DİYALOĞU ═══ -->
+        <Border Grid.RowSpan="3"
+                Background="#80000000"
+                Visibility="{Binding IsEditDialogOpen, Converter={StaticResource BoolToVisibility}}">
+            <Border Background="White"
+                    CornerRadius="8"
+                    Padding="24"
+                    Width="540"
+                    VerticalAlignment="Center" HorizontalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="Sınavı Düzenle"
+                               FontSize="20" FontWeight="Bold"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               Margin="0,0,0,16"/>
+
+                    <TextBlock Text="Sınav Başlığı" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding EditTitle, UpdateSourceTrigger=PropertyChanged}"
+                             Padding="8,6" Margin="0,0,0,12"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Tarih" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                            <DatePicker SelectedDate="{Binding EditExamDate}" Padding="8,4"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Süre (dk)" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditDurationMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="8,6"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="Sınav Tipi" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <ComboBox SelectedItem="{Binding EditExamType}" Padding="8,6" Margin="0,0,0,16">
+                        <ComboBox.Items>
+                            <x:Static Member="enums:ExamType.Quiz"/>
+                            <x:Static Member="enums:ExamType.Midterm"/>
+                            <x:Static Member="enums:ExamType.Final"/>
+                            <x:Static Member="enums:ExamType.MakeUp"/>
+                        </ComboBox.Items>
+                    </ComboBox>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="İptal"
+                                Command="{Binding CancelEditCommand}"
+                                Background="#F3F4F6"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                Padding="16,8"
+                                Cursor="Hand"
+                                Margin="0,0,8,0"/>
+                        <Button Content="💾 Kaydet"
+                                Command="{Binding SaveEditCommand}"
+                                Background="{StaticResource PrimaryBrush}"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Padding="20,8"
+                                FontWeight="SemiBold"
+                                Cursor="Hand"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>

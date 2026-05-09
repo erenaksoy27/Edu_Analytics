@@ -61,7 +61,7 @@ public class QuestionCreateModel
 
     public List<int> TopicIds { get; set; } = new();
 
-    /// <summary>Sorunun bağlandığı ders çıktıları (ÖÇ'ler).</summary>
+    /// <summary>Sorunun bağlandığı öğrenim çıktıları (ÖÇ'ler).</summary>
     public List<int> LearningOutcomeIds { get; set; } = new();
 
     /// <summary>İlişkili soru grubu (common-stem). null = bağımsız soru.</summary>

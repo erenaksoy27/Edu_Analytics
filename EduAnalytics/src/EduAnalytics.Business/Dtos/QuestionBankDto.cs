@@ -29,6 +29,9 @@ public class QuestionBankItemDto
     /// <summary>Bu soru kaç sınavda kullanıldı?</summary>
     public int UsedInExamCount { get; set; }
 
+    /// <summary>Bu sorunun kullanıldığı sınavların başlıkları.</summary>
+    public List<string> UsedInExamTitles { get; set; } = new();
+
     public DateTime CreatedAt { get; set; }
 }
 

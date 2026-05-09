@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Business.Dtos;
 using EduAnalytics.Business.Services.Interfaces;
 using EduAnalytics.Core.Entities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EduAnalytics.UI.ViewModels;
 
@@ -195,6 +196,34 @@ public partial class QuestionBankViewModel : ObservableObject
         finally
         {
             _searchLock.Release();
+        }
+    }
+
+    [RelayCommand]
+    private async Task EditAsync(QuestionBankItemDto? item)
+    {
+        if (item == null) return;
+
+        try
+        {
+            var dialogVm = App.Services.GetRequiredService<QuestionEditDialogViewModel>();
+            await dialogVm.LoadAsync(item.Id);
+
+            var dialog = new Views.QuestionEditDialog(dialogVm)
+            {
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+
+            var result = dialog.ShowDialog();
+            if (result == true)
+            {
+                SuccessMessage = "Soru güncellendi.";
+                await SearchSafelyAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Düzenleme hatası: {ex.Message}";
         }
     }
 

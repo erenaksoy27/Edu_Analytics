@@ -21,7 +21,8 @@ public class QuestionBankService : IQuestionBankService
             .Include(q => q.Course)
             .Include(q => q.QuestionTopics).ThenInclude(qt => qt.Topic)
             .Include(q => q.QuestionLearningOutcomes).ThenInclude(ql => ql.LearningOutcome)
-            .Include(q => q.ExamQuestions)
+            .Include(q => q.ExamQuestions).ThenInclude(eq => eq.Exam)
+            .AsNoTracking()
             .AsQueryable();
 
         if (filter.CourseId.HasValue)
@@ -59,10 +60,42 @@ public class QuestionBankService : IQuestionBankService
             .Include(qq => qq.Course)
             .Include(qq => qq.QuestionTopics).ThenInclude(qt => qt.Topic)
             .Include(qq => qq.QuestionLearningOutcomes).ThenInclude(ql => ql.LearningOutcome)
-            .Include(qq => qq.ExamQuestions)
+            .Include(qq => qq.ExamQuestions).ThenInclude(eq => eq.Exam)
+            .AsNoTracking()
             .FirstOrDefaultAsync(qq => qq.Id == questionId);
 
         return q == null ? null : MapToItem(q);
+    }
+
+    public async Task<QuestionBankCreateModel?> GetEditModelAsync(int questionId)
+    {
+        var q = await _context.Questions
+            .Include(qq => qq.QuestionTopics)
+            .Include(qq => qq.QuestionLearningOutcomes)
+            .FirstOrDefaultAsync(qq => qq.Id == questionId);
+
+        if (q == null) return null;
+
+        return new QuestionBankCreateModel
+        {
+            CourseId = q.CourseId,
+            QuestionGroupId = q.QuestionGroupId,
+            Type = q.Type,
+            MaxPoints = q.MaxPoints,
+            QuestionText = q.QuestionText,
+            OptionA = q.OptionA,
+            OptionB = q.OptionB,
+            OptionC = q.OptionC,
+            OptionD = q.OptionD,
+            OptionE = q.OptionE,
+            CorrectOption = q.CorrectOption,
+            AnswerKey = q.AnswerKey,
+            IsActive = q.IsActive,
+            IsFavorite = q.IsFavorite,
+            CreatedByUserId = q.CreatedByUserId,
+            TopicIds = q.QuestionTopics.Select(qt => qt.TopicId).ToList(),
+            LearningOutcomeIds = q.QuestionLearningOutcomes.Select(ql => ql.LearningOutcomeId).ToList()
+        };
     }
 
     public async Task<int> CreateAsync(QuestionBankCreateModel model)
@@ -212,8 +245,9 @@ public class QuestionBankService : IQuestionBankService
             .Include(q => q.Course)
             .Include(q => q.QuestionTopics).ThenInclude(qt => qt.Topic)
             .Include(q => q.QuestionLearningOutcomes).ThenInclude(ql => ql.LearningOutcome)
-            .Include(q => q.ExamQuestions)
+            .Include(q => q.ExamQuestions).ThenInclude(eq => eq.Exam)
             .Where(q => q.QuestionGroupId == groupId)
+            .AsNoTracking()
             .OrderBy(q => q.CreatedAt)
             .ToListAsync();
 
@@ -242,6 +276,12 @@ public class QuestionBankService : IQuestionBankService
             .Distinct()
             .ToList(),
         UsedInExamCount = q.ExamQuestions.Count,
+        UsedInExamTitles = q.ExamQuestions
+            .Where(eq => eq.Exam != null)
+            .Select(eq => eq.Exam.Title)
+            .Distinct()
+            .OrderBy(t => t)
+            .ToList(),
         CreatedAt = q.CreatedAt
     };
 

@@ -1,4 +1,7 @@
+using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Core.Entities;
@@ -44,14 +47,45 @@ public partial class QuestionEditViewModel : ObservableObject
     private Topic? _topicToAdd;
 
     // --- Learning Outcomes support ---
-    /// <summary>Mevcut ders için tüm öğrenim çıktıları (ÖÇ).</summary>
-    public ObservableCollection<LearningOutcomeDto> AvailableLearningOutcomes { get; } = new();
+    /// <summary>Mevcut ders için tüm öğrenim çıktıları (ÖÇ) — UI için seçilebilir wrapper.</summary>
+    public ObservableCollection<SelectableLearningOutcome> AvailableLearningOutcomes { get; } = new();
 
-    /// <summary>Bu soruya bağlanmış öğrenim çıktıları.</summary>
+    /// <summary>Bu soruya bağlanmış öğrenim çıktıları (kayıtta kullanılır).</summary>
     public ObservableCollection<LearningOutcomeDto> SelectedLearningOutcomes { get; set; } = new();
+
+    /// <summary>Filtrelenmiş ÖÇ görünümü — TextBox.Text → LearningOutcomeFilter ile bağlanır.</summary>
+    public ICollectionView LearningOutcomesView { get; }
+
+    [ObservableProperty]
+    private string _learningOutcomeFilter = string.Empty;
 
     [ObservableProperty]
     private LearningOutcomeDto? _learningOutcomeToAdd;
+
+    public QuestionEditViewModel()
+    {
+        LearningOutcomesView = CollectionViewSource.GetDefaultView(AvailableLearningOutcomes);
+        LearningOutcomesView.Filter = obj =>
+        {
+            if (obj is not SelectableLearningOutcome item) return false;
+            var filter = LearningOutcomeFilter?.Trim();
+            if (string.IsNullOrEmpty(filter)) return true;
+            return (item.Name?.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+                || (item.Code?.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0);
+        };
+
+        SelectedLearningOutcomes.CollectionChanged += (_, e) =>
+        {
+            if (e.OldItems != null)
+                foreach (LearningOutcomeDto removed in e.OldItems)
+                    AvailableLearningOutcomes.FirstOrDefault(w => w.Outcome.Id == removed.Id)?.SyncFromExternal(false);
+            if (e.NewItems != null)
+                foreach (LearningOutcomeDto added in e.NewItems)
+                    AvailableLearningOutcomes.FirstOrDefault(w => w.Outcome.Id == added.Id)?.SyncFromExternal(true);
+        };
+    }
+
+    partial void OnLearningOutcomeFilterChanged(string value) => LearningOutcomesView.Refresh();
 
     // ----------------------------------
 

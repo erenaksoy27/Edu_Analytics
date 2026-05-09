@@ -181,7 +181,8 @@ public partial class ExamCreateViewModel : ObservableObject
                 foreach (var q in Questions)
                 {
                     q.AvailableLearningOutcomes.Clear();
-                    foreach (var lo in outcomes) q.AvailableLearningOutcomes.Add(lo);
+                    foreach (var lo in outcomes)
+                        q.AvailableLearningOutcomes.Add(new SelectableLearningOutcome(lo, q.SelectedLearningOutcomes));
                 }
             }
         }
@@ -233,8 +234,9 @@ public partial class ExamCreateViewModel : ObservableObject
             QuestionNumber = Questions.Count + 1
         };
         foreach (var t in AvailableTopics) q.AvailableTopics.Add(t);
-        
-        foreach (var lo in AvailableLearningOutcomes) q.AvailableLearningOutcomes.Add(lo);
+
+        foreach (var lo in AvailableLearningOutcomes)
+            q.AvailableLearningOutcomes.Add(new SelectableLearningOutcome(lo, q.SelectedLearningOutcomes));
 
         Questions.Add(q);
     }

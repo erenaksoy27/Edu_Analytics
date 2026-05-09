@@ -1,0 +1,121 @@
+<UserControl x:Class="EduAnalytics.UI.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:EduAnalytics.UI.ViewModels"
+             d:DataContext="{d:DesignInstance Type=vm:DashboardViewModel}"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Başlık -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="Dashboard" Style="{StaticResource HeadingStyle}"/>
+            <TextBlock Text="Sınav listesi ve hızlı istatistikler. Bir sınava tıklayarak detaylı analize ulaşın."
+                       Foreground="{StaticResource TextSecondaryBrush}"/>
+        </StackPanel>
+
+        <!-- Sınav listesi -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Exams}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border>
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick"
+                                              Command="{Binding DataContext.OpenAnalysisCommand,
+                                                          RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                              CommandParameter="{Binding}"/>
+                            </Border.InputBindings>
+                            <Border.Style>
+                                <Style TargetType="Border" BasedOn="{StaticResource CardStyle}">
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                                            <Setter Property="BorderThickness" Value="2"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Sol: Sınav bilgisi -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{Binding ExamTitle}"
+                                               FontSize="18" FontWeight="Bold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                        <TextBlock Text="{Binding CourseName}"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock Text=" · " Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding ExamDate, StringFormat='{}{0:dd.MM.yyyy}'}"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Metrikler -->
+                                <StackPanel Grid.Column="1" Margin="24,0">
+                                    <TextBlock Text="{Binding TotalStudents}"
+                                               Style="{StaticResource MetricValueStyle}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="ÖĞRENCİ"
+                                               Style="{StaticResource MetricLabelStyle}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Margin="24,0">
+                                    <TextBlock Text="{Binding TotalQuestions}"
+                                               Style="{StaticResource MetricValueStyle}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="SORU"
+                                               Style="{StaticResource MetricLabelStyle}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="3" Margin="24,0">
+                                    <TextBlock Style="{StaticResource MetricValueStyle}"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{StaticResource SuccessBrush}">
+                                        <Run Text="%"/>
+                                        <Run Text="{Binding AverageSuccessRate}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="ORTALAMA BAŞARI"
+                                               Style="{StaticResource MetricLabelStyle}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Ok -->
+                                <TextBlock Grid.Column="4" Text="›"
+                                           FontSize="32"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           VerticalAlignment="Center" Margin="16,0,0,0"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Yükleme göstergesi -->
+        <Border Grid.Row="0" Grid.RowSpan="2"
+                Background="#80FFFFFF"
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="Yükleniyor..." HorizontalAlignment="Center" VerticalAlignment="Center"
+                       FontSize="18" Foreground="{StaticResource PrimaryBrush}"/>
+        </Border>
+    </Grid>
+</UserControl>

@@ -20,7 +20,13 @@ public class StudentPerformanceDto
     public int ClassRank { get; set; }                         // Sınıf sıralaması (1 = en yüksek)
 
     /// <summary>
-    /// Bu öğrencinin zayıf olduğu konular (başarı oranı %50'nin altında olanlar).
+    /// Bu öğrencinin zayıf olduğu öğrenim çıktıları (başarı oranı %50'nin altında olanlar).
     /// </summary>
-    public List<string> WeakTopics { get; set; } = new();
+    public List<string> WeakLearningOutcomes { get; set; } = new();
+
+    public List<string> WeakTopics
+    {
+        get => WeakLearningOutcomes;
+        set => WeakLearningOutcomes = value;
+    }
 }

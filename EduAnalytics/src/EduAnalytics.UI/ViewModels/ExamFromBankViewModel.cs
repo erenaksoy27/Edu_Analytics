@@ -38,6 +38,8 @@ public partial class ExamFromBankViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<QuestionBankItemDto> _bankPool = new();
     [ObservableProperty] private string _bankSearchText = string.Empty;
     [ObservableProperty] private ObservableCollection<LearningOutcomeDto> _availableOutcomes = new();
+    [ObservableProperty] private QuestionBankItemDto? _detailQuestion;
+    [ObservableProperty] private QuestionBankCreateModel? _detailQuestionModel;
 
     // Seçili sorular (sağ kolon)
     [ObservableProperty] private ObservableCollection<QuestionBankItemDto> _selectedQuestions = new();
@@ -235,6 +237,35 @@ public partial class ExamFromBankViewModel : ObservableObject
     private Task ReloadPoolAsync() => SearchPoolAsync();
 
     [RelayCommand]
+    private async Task ShowQuestionDetailAsync(QuestionBankItemDto? q)
+    {
+        if (q == null) return;
+
+        await _opLock.WaitAsync();
+        try
+        {
+            DetailQuestion = q;
+            DetailQuestionModel = await _bankService.GetEditModelAsync(q.Id);
+            ErrorMessage = DetailQuestionModel == null ? "Soru detayı bulunamadı." : null;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Soru detayı yüklenemedi: {ex.Message}";
+        }
+        finally
+        {
+            _opLock.Release();
+        }
+    }
+
+    [RelayCommand]
+    private void CloseQuestionDetail()
+    {
+        DetailQuestion = null;
+        DetailQuestionModel = null;
+    }
+
+    [RelayCommand]
     private async Task AddToExamAsync(QuestionBankItemDto? q)
     {
         if (q == null) return;
@@ -267,6 +298,30 @@ public partial class ExamFromBankViewModel : ObservableObject
         var idx = SelectedQuestions.IndexOf(q);
         if (idx >= 0 && idx < SelectedQuestions.Count - 1)
             SelectedQuestions.Move(idx, idx + 1);
+    }
+
+    /// <summary>
+    /// Seçili sorulara 100/N puan paylaştırır. Bu değer kayıtta OverrideMaxPoints olur;
+    /// soru bankasındaki orijinal puan korunur.
+    /// </summary>
+    [RelayCommand]
+    private void DistributePointsTo100()
+    {
+        if (SelectedQuestions.Count == 0)
+        {
+            ErrorMessage = "Puan dağıtımı için önce soru seçmelisiniz.";
+            return;
+        }
+
+        var pointsPerQuestion = Math.Round(100m / SelectedQuestions.Count, 2);
+
+        var snapshot = SelectedQuestions.ToList();
+        foreach (var q in snapshot)
+            q.MaxPoints = pointsPerQuestion;
+
+        SelectedQuestions = new ObservableCollection<QuestionBankItemDto>(snapshot);
+        SuccessMessage = $"{snapshot.Count} soruya {pointsPerQuestion} puan paylaştırıldı.";
+        ErrorMessage = null;
     }
 
     private async Task UpdateBalancePreviewAsync()
@@ -328,7 +383,7 @@ public partial class ExamFromBankViewModel : ObservableObject
                     {
                         QuestionId = q.Id,
                         OrderInExam = i + 1,
-                        OverrideMaxPoints = null
+                        OverrideMaxPoints = q.MaxPoints
                     })
                     .ToList()
             };

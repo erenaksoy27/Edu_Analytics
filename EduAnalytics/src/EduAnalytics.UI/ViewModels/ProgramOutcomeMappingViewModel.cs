@@ -28,7 +28,7 @@ public class MatrixRow
 }
 
 /// <summary>
-/// Program Çıktısı (PÇ) ↔ Ders Çıktısı (ÖÇ) eşleştirme ekranı.
+/// Program Çıktısı (PÇ) ↔ Öğrenim Çıktısı (ÖÇ) eşleştirme ekranı.
 /// Soldan PÇ seç, sağda eşleşmiş ÖÇ'leri gör + bağlanabilecek ÖÇ'ler havuzından ekle / kaldır.
 /// </summary>
 public partial class ProgramOutcomeMappingViewModel : ObservableObject

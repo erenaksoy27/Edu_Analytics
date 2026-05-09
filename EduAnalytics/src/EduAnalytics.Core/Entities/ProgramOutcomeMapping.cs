@@ -1,8 +1,8 @@
 namespace EduAnalytics.Core.Entities;
 
 /// <summary>
-/// Program Çıktısı (PÇ) ↔ Ders Çıktısı (ÖÇ) çoka-çok ilişkisi.
-/// Bir ders çıktısı birden fazla program çıktısına katkı sağlayabilir.
+/// Program Çıktısı (PÇ) ↔ Öğrenim Çıktısı (ÖÇ) çoka-çok ilişkisi.
+/// Bir öğrenim çıktısı birden fazla program çıktısına katkı sağlayabilir.
 /// ContributionLevel (1-5): bu ÖÇ'nün PÇ'ye katkı seviyesi.
 /// </summary>
 public class ProgramOutcomeMapping
