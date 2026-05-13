@@ -1,4 +1,5 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Business.Dtos;
@@ -7,24 +8,33 @@ using EduAnalytics.Core.Entities;
 
 namespace EduAnalytics.UI.ViewModels;
 
+public partial class MatrixCell : ObservableObject
+{
+    public int ProgramOutcomeId { get; init; }
+    public int LearningOutcomeId { get; init; }
+    public string ProgramOutcomeCode { get; init; } = string.Empty;
+    public string LearningOutcomeCode { get; init; } = string.Empty;
+    public string ToolTip { get; init; } = string.Empty;
+
+    [ObservableProperty] private int? _contributionLevel;
+
+    public string DisplayValue => ContributionLevel?.ToString() ?? string.Empty;
+
+    partial void OnContributionLevelChanged(int? value)
+        => OnPropertyChanged(nameof(DisplayValue));
+}
+
+public class MatrixColumnHeader
+{
+    public string Label { get; init; } = string.Empty;
+    public string ToolTip { get; init; } = string.Empty;
+}
+
 public class MatrixRow
 {
     public string RowLabel { get; set; } = string.Empty;
-    public int? P1 { get; set; }
-    public int? P2 { get; set; }
-    public int? P3 { get; set; }
-    public int? P4 { get; set; }
-    public int? P5 { get; set; }
-    public int? P6 { get; set; }
-    public int? P7 { get; set; }
-    public int? P8 { get; set; }
-    public int? P9 { get; set; }
-    public int? P10 { get; set; }
-    public int? P11 { get; set; }
-    public int? P12 { get; set; }
-    public int? P13 { get; set; }
-    public int? P14 { get; set; }
-    public int? P15 { get; set; }
+    public string ToolTip { get; set; } = string.Empty;
+    public ObservableCollection<MatrixCell> Cells { get; } = new();
 }
 
 /// <summary>
@@ -47,6 +57,7 @@ public partial class ProgramOutcomeMappingViewModel : ObservableObject
     [ObservableProperty] private int _newContributionLevel = 3;
 
     [ObservableProperty] private ObservableCollection<MatrixRow> _matrixRows = new();
+    [ObservableProperty] private ObservableCollection<MatrixColumnHeader> _matrixColumns = new();
 
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _errorMessage;
@@ -113,6 +124,8 @@ public partial class ProgramOutcomeMappingViewModel : ObservableObject
         if (SelectedProgramOutcome == null)
         {
             MappedOutcomes = new ObservableCollection<MappedLearningOutcomeDto>();
+            MatrixRows = new ObservableCollection<MatrixRow>();
+            MatrixColumns = new ObservableCollection<MatrixColumnHeader>();
             return;
         }
         try
@@ -134,48 +147,68 @@ public partial class ProgramOutcomeMappingViewModel : ObservableObject
 
     private async Task RegenerateMatrixAsync(int programId)
     {
-        var allOutcomes = await _service.GetByProgramAsync(programId);
-        
-        var matrixList = new List<MatrixRow>();
-        
-        // ÖÇ koduna (Ö1, Ö2...) göre gruplandır
-        var ocMappings = new Dictionary<string, MatrixRow>();
-        
-        foreach (var po in allOutcomes)
-        {
-            var mappingsForPo = await _service.GetMappedLearningOutcomesAsync(po.Id);
-            foreach(var mapping in mappingsForPo)
+        var programOutcomes = await _service.GetByProgramAsync(programId);
+        var learningOutcomes = await _service.GetAllLearningOutcomesInProgramAsync(programId);
+
+        var orderedProgramOutcomes = programOutcomes
+            .Select(po => new { Outcome = po, Index = ParseOutcomeIndex(po.Code) })
+            .Where(po => po.Index is >= 1 and <= 15)
+            .OrderBy(po => po.Index)
+            .ToList();
+
+        MatrixColumns = new ObservableCollection<MatrixColumnHeader>(
+            orderedProgramOutcomes.Select(po => new MatrixColumnHeader
             {
-                if(!ocMappings.ContainsKey(mapping.Code))
-                {
-                   ocMappings[mapping.Code] = new MatrixRow { RowLabel = mapping.Code };
-                }
+                Label = $"P{po.Index}",
+                ToolTip = $"{po.Outcome.Code}: {po.Outcome.Description}"
+            }));
 
-                var row = ocMappings[mapping.Code];
-                if (po.Code == "P1") row.P1 = mapping.ContributionLevel;
-                else if (po.Code == "P2") row.P2 = mapping.ContributionLevel;
-                else if (po.Code == "P3") row.P3 = mapping.ContributionLevel;
-                else if (po.Code == "P4") row.P4 = mapping.ContributionLevel;
-                else if (po.Code == "P5") row.P5 = mapping.ContributionLevel;
-                else if (po.Code == "P6") row.P6 = mapping.ContributionLevel;
-                else if (po.Code == "P7") row.P7 = mapping.ContributionLevel;
-                else if (po.Code == "P8") row.P8 = mapping.ContributionLevel;
-                else if (po.Code == "P9") row.P9 = mapping.ContributionLevel;
-                else if (po.Code == "P10") row.P10 = mapping.ContributionLevel;
-                else if (po.Code == "P11") row.P11 = mapping.ContributionLevel;
-                else if (po.Code == "P12") row.P12 = mapping.ContributionLevel;
-                else if (po.Code == "P13") row.P13 = mapping.ContributionLevel;
-                else if (po.Code == "P14") row.P14 = mapping.ContributionLevel;
-                else if (po.Code == "P15") row.P15 = mapping.ContributionLevel;
-            }
-        }
-
-        foreach(var item in ocMappings.Values.OrderBy(v => v.RowLabel))
+        var contributionMap = new Dictionary<(int ProgramOutcomeId, int LearningOutcomeId), int>();
+        foreach (var po in orderedProgramOutcomes)
         {
-            matrixList.Add(item);
+            var mappings = await _service.GetMappedLearningOutcomesAsync(po.Outcome.Id);
+            foreach (var mapping in mappings)
+                contributionMap[(po.Outcome.Id, mapping.LearningOutcomeId)] = mapping.ContributionLevel;
         }
-        
-        MatrixRows = new ObservableCollection<MatrixRow>(matrixList);
+
+        var rows = new List<MatrixRow>();
+        foreach (var lo in learningOutcomes.OrderBy(lo => ParseOutcomeIndex(lo.Code)).ThenBy(lo => lo.Code))
+        {
+            var row = new MatrixRow
+            {
+                RowLabel = lo.Code,
+                ToolTip = $"{lo.Code}: {lo.Name}"
+            };
+
+            foreach (var po in orderedProgramOutcomes)
+            {
+                contributionMap.TryGetValue((po.Outcome.Id, lo.Id), out var level);
+                row.Cells.Add(new MatrixCell
+                {
+                    ProgramOutcomeId = po.Outcome.Id,
+                    LearningOutcomeId = lo.Id,
+                    ProgramOutcomeCode = po.Outcome.Code,
+                    LearningOutcomeCode = lo.Code,
+                    ContributionLevel = level == 0 ? null : level,
+                    ToolTip = $"{lo.Code} - {lo.Name}\n{po.Outcome.Code} - {po.Outcome.Description}\nKatkı düzeyini listeden seçin."
+                });
+            }
+
+            rows.Add(row);
+        }
+
+        MatrixRows = new ObservableCollection<MatrixRow>(rows);
+    }
+
+    private static int ParseOutcomeIndex(string? code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+            return int.MaxValue;
+
+        var match = Regex.Match(code, @"\d+");
+        return match.Success && int.TryParse(match.Value, out var index)
+            ? index
+            : int.MaxValue;
     }
 
     [RelayCommand]
@@ -209,7 +242,7 @@ public partial class ProgramOutcomeMappingViewModel : ObservableObject
     {
         if (mapping == null || SelectedProgramOutcome == null) return;
 
-        var confirm = System.Windows.MessageBox.Show(
+        var confirm = EduAnalytics.UI.Services.AppMessageBox.Show(
             $"'{mapping.Code} — {mapping.Name}' eşleştirmesini kaldırmak istediğinize emin misiniz?",
             "Eşleştirme Kaldır",
             System.Windows.MessageBoxButton.YesNo,
@@ -240,10 +273,49 @@ public partial class ProgramOutcomeMappingViewModel : ObservableObject
                 Math.Clamp(mapping.ContributionLevel, 1, 5));
 
             SuccessMessage = $"✓ Katkı seviyesi güncellendi.";
+            if (SelectedProgram != null)
+                await RegenerateMatrixAsync(SelectedProgram.Id);
         }
         catch (Exception ex)
         {
             ErrorMessage = $"Güncelleme hatası: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private async Task SaveMatrixCellAsync(MatrixCell? cell)
+    {
+        if (cell == null)
+            return;
+
+        try
+        {
+            ErrorMessage = null;
+            SuccessMessage = null;
+
+            if (cell.ContributionLevel == null)
+            {
+                await _service.UnlinkFromLearningOutcomeAsync(cell.ProgramOutcomeId, cell.LearningOutcomeId);
+            }
+            else
+            {
+                await _service.LinkToLearningOutcomeAsync(
+                    cell.ProgramOutcomeId,
+                    cell.LearningOutcomeId,
+                    Math.Clamp(cell.ContributionLevel.Value, 1, 5));
+            }
+
+            SuccessMessage = cell.ContributionLevel == null
+                ? $"✓ {cell.LearningOutcomeCode} - {cell.ProgramOutcomeCode} katkısı temizlendi."
+                : $"✓ {cell.LearningOutcomeCode} - {cell.ProgramOutcomeCode} katkısı {cell.ContributionLevel} yapıldı.";
+
+            if (SelectedProgramOutcome?.Id == cell.ProgramOutcomeId)
+                MappedOutcomes = new ObservableCollection<MappedLearningOutcomeDto>(
+                    await _service.GetMappedLearningOutcomesAsync(cell.ProgramOutcomeId));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Katkı güncellenemedi: {ex.Message}";
         }
     }
 }

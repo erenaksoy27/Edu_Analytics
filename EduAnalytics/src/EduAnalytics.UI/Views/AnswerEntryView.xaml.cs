@@ -1,8 +1,7 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media;
 using EduAnalytics.Core.Enums;
 using EduAnalytics.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -79,7 +78,7 @@ public partial class AnswerEntryView : UserControl
             Binding = new Binding("StudentNumber"),
             IsReadOnly = true,
             Width = new DataGridLength(90),
-            CellStyle = MakeCellStyle(bold: true, background: "#F3F4F6")
+            CellStyle = MakeCellStyle(bold: true, backgroundResourceKey: "CardSubtleBgBrush")
         });
 
         AnswersGrid.Columns.Add(new DataGridTextColumn
@@ -88,7 +87,7 @@ public partial class AnswerEntryView : UserControl
             Binding = new Binding("FullName"),
             IsReadOnly = true,
             Width = new DataGridLength(180),
-            CellStyle = MakeCellStyle(bold: true, background: "#F3F4F6")
+            CellStyle = MakeCellStyle(bold: true, backgroundResourceKey: "CardSubtleBgBrush")
         });
 
         // Kitapçık sütunu (sınavda 2+ kitapçık varsa kullanışlı; tek kitapçıkta da görünür)
@@ -103,7 +102,7 @@ public partial class AnswerEntryView : UserControl
                     UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
                 },
                 Width = new DataGridLength(85),
-                CellStyle = MakeCellStyle(bold: true, background: "#FEF3C7")
+                CellStyle = MakeCellStyle(bold: true, backgroundResourceKey: "WarningSubtleBgBrush")
             };
             AnswersGrid.Columns.Add(bookletCol);
         }
@@ -134,7 +133,7 @@ public partial class AnswerEntryView : UserControl
             }
             else
             {
-                // Klasik: TextBox + 📋 detay butonu (rubric kriter puanlaması)
+                // Klasik: TextBox + not detay butonu (rubric kriter puanlaması)
                 var template = new DataTemplate();
                 var stackFactory = new FrameworkElementFactory(typeof(StackPanel));
                 stackFactory.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
@@ -154,11 +153,10 @@ public partial class AnswerEntryView : UserControl
                 tbFactory.SetValue(Control.PaddingProperty, new Thickness(4, 2, 4, 2));
                 tbFactory.SetValue(Control.VerticalContentAlignmentProperty, VerticalAlignment.Center);
                 tbFactory.SetValue(TextBox.TextAlignmentProperty, TextAlignment.Center);
-                tbFactory.SetValue(Control.BackgroundProperty,
-                    new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF9C3")));
+                tbFactory.SetResourceReference(Control.BackgroundProperty, "WarningSubtleBgBrush");
 
                 var btnFactory = new FrameworkElementFactory(typeof(Button));
-                btnFactory.SetValue(Button.ContentProperty, "📋");
+                btnFactory.SetValue(Button.ContentProperty, "Not");
                 btnFactory.SetValue(Button.ToolTipProperty, "Detaylı (kriter-bazlı) puanla");
                 btnFactory.SetValue(FrameworkElement.WidthProperty, 26.0);
                 btnFactory.SetValue(FrameworkElement.HeightProperty, 26.0);
@@ -193,26 +191,26 @@ public partial class AnswerEntryView : UserControl
         }
     }
 
-    private static Style MakeCellStyle(bool bold = false, string? background = null)
+    private static Style MakeCellStyle(bool bold = false, string? backgroundResourceKey = null)
     {
         var style = new Style(typeof(DataGridCell));
         if (bold)
             style.Setters.Add(new Setter(TextBlock.FontWeightProperty, FontWeights.SemiBold));
-        if (background != null)
+        if (backgroundResourceKey != null)
             style.Setters.Add(new Setter(Control.BackgroundProperty,
-                new SolidColorBrush((Color)ColorConverter.ConvertFromString(background))));
+                new DynamicResourceExtension(backgroundResourceKey)));
         style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(8, 4, 8, 4)));
         return style;
     }
 
-    private static Style MakeTextElementStyle(string? background = null)
+    private static Style MakeTextElementStyle(string? backgroundResourceKey = null)
     {
         var style = new Style(typeof(TextBlock));
         style.Setters.Add(new Setter(TextBlock.PaddingProperty, new Thickness(8, 4, 8, 4)));
         style.Setters.Add(new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Center));
-        if (background != null)
+        if (backgroundResourceKey != null)
             style.Setters.Add(new Setter(TextBlock.BackgroundProperty,
-                new SolidColorBrush((Color)ColorConverter.ConvertFromString(background))));
+                new DynamicResourceExtension(backgroundResourceKey)));
         return style;
     }
 

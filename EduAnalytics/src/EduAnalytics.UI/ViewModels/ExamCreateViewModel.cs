@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Business.Dtos;
@@ -39,6 +39,10 @@ public partial class ExamCreateViewModel : ObservableObject
     [ObservableProperty] private bool _isSaving;
     [ObservableProperty] private string? _errorMessage;
     [ObservableProperty] private string? _successMessage;
+    [ObservableProperty] private string? _courseError;
+    [ObservableProperty] private string? _titleError;
+    [ObservableProperty] private string? _durationMinutesError;
+    [ObservableProperty] private string? _questionsError;
 
     // ── ÖĞRENCİ FİLTRESİ — ÇOKLU SINIF / BÖLÜM ──
     [ObservableProperty] private ObservableCollection<StudentSelectionViewModel> _allStudents = new();
@@ -161,8 +165,12 @@ public partial class ExamCreateViewModel : ObservableObject
 
     partial void OnSelectedCourseChanged(Course? value)
     {
+        CourseError = null;
         _ = ReloadLearningOutcomesAsync();
     }
+
+    partial void OnTitleChanged(string value) => TitleError = null;
+    partial void OnDurationMinutesChanged(int value) => DurationMinutesError = null;
 
     private async Task ReloadLearningOutcomesAsync()
     {
@@ -229,6 +237,7 @@ public partial class ExamCreateViewModel : ObservableObject
     [RelayCommand]
     private void AddQuestion()
     {
+        QuestionsError = null;
         var q = new QuestionEditViewModel
         {
             QuestionNumber = Questions.Count + 1
@@ -247,9 +256,63 @@ public partial class ExamCreateViewModel : ObservableObject
         if (q != null)
         {
             Questions.Remove(q);
+            if (Questions.Count == 0)
+                QuestionsError = "En az bir soru eklemelisiniz.";
             for (int i = 0; i < Questions.Count; i++)
                 Questions[i].QuestionNumber = i + 1;
         }
+    }
+
+    private void ClearFormErrors()
+    {
+        CourseError = null;
+        TitleError = null;
+        DurationMinutesError = null;
+        QuestionsError = null;
+        foreach (var q in Questions)
+            q.ClearValidationErrors();
+    }
+
+    private bool ValidateForm()
+    {
+        ClearFormErrors();
+
+        if (SelectedCourse == null)
+        {
+            CourseError = "Ders seçmelisiniz.";
+            ErrorMessage = CourseError;
+            return false;
+        }
+        if (string.IsNullOrWhiteSpace(Title))
+        {
+            TitleError = "Sınav başlığı zorunlu.";
+            ErrorMessage = "Sınav başlığı boş olamaz.";
+            return false;
+        }
+        if (DurationMinutes <= 0)
+        {
+            DurationMinutesError = "Süre 0'dan büyük olmalı.";
+            ErrorMessage = DurationMinutesError;
+            return false;
+        }
+        if (Questions.Count == 0)
+        {
+            QuestionsError = "En az bir soru eklemelisiniz.";
+            ErrorMessage = QuestionsError;
+            return false;
+        }
+
+        foreach (var q in Questions)
+        {
+            var err = q.Validate();
+            if (err != null)
+            {
+                ErrorMessage = err;
+                return false;
+            }
+        }
+
+        return true;
     }
 
     [RelayCommand]
@@ -303,32 +366,8 @@ public partial class ExamCreateViewModel : ObservableObject
         ErrorMessage = null;
         SuccessMessage = null;
 
-        if (SelectedCourse == null)
-        {
-            ErrorMessage = "Ders seçmelisiniz.";
+        if (!ValidateForm())
             return;
-        }
-        if (string.IsNullOrWhiteSpace(Title))
-        {
-            ErrorMessage = "Sınav başlığı boş olamaz.";
-            return;
-        }
-        
-        if (Questions.Count == 0)
-        {
-            ErrorMessage = "En az bir soru eklemelisiniz.";
-            return;
-        }
-
-        foreach (var q in Questions)
-        {
-            var err = q.Validate();
-            if (err != null)
-            {
-                ErrorMessage = err;
-                return;
-            }
-        }
 
         // Seçili öğrenciler (sınıf filtresi gözardı edilir, IsSelected esas)
         var studentModels = AllStudents

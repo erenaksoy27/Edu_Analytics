@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Enums;
+﻿namespace EduAnalytics.Core.Enums;
 
 /// <summary>
 /// Sınav tipi. Vize seçilirse soru havuzu o tarihe kadar olan ÖÇ'lerle sınırlanır.

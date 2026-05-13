@@ -1,8 +1,9 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Business.Dtos;
 using EduAnalytics.Business.Services.Interfaces;
+using EduAnalytics.UI.Services;
 
 namespace EduAnalytics.UI.ViewModels;
 
@@ -13,11 +14,20 @@ public partial class DashboardViewModel : ObservableObject
     private readonly IItemAnalysisService _itemAnalysisService;
     private readonly ILearningOutcomePerformanceService _learningOutcomeService;
     private readonly IStudentService _studentService;
+    private readonly IUserProfileService _userProfile;
 
     public event Action<int>? OpenAnalysisRequested;
 
+    private List<ExamSummaryDto> _allExams = new();
+
     [ObservableProperty]
     private ObservableCollection<ExamSummaryDto> _exams = new();
+
+    [ObservableProperty]
+    private ObservableCollection<ExamSummaryDto> _filteredExams = new();
+
+    [ObservableProperty]
+    private string _searchText = string.Empty;
 
     [ObservableProperty]
     private bool _isLoading;
@@ -31,23 +41,47 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private string _lastActivityDate = "—";
 
+    public string DisplayUserName =>
+        string.IsNullOrWhiteSpace(_userProfile.Current.Username)
+            ? "Edu"
+            : _userProfile.Current.Username;
+
+    public string GreetingText
+    {
+        get
+        {
+            var hour = DateTime.Now.Hour;
+            return hour switch
+            {
+                >= 5 and < 12 => "Günaydın, ",
+                >= 12 and < 17 => "Tünaydın, ",
+                >= 17 and < 22 => "İyi akşamlar, ",
+                _ => "İyi geceler, "
+            };
+        }
+    }
+
     public DashboardViewModel(
         IExamAnalysisService examAnalysis,
         IExamStatisticsService statisticsService,
         IItemAnalysisService itemAnalysisService,
         ILearningOutcomePerformanceService learningOutcomeService,
-        IStudentService studentService)
+        IStudentService studentService,
+        IUserProfileService userProfile)
     {
         _examAnalysis = examAnalysis;
         _statisticsService = statisticsService;
         _itemAnalysisService = itemAnalysisService;
         _learningOutcomeService = learningOutcomeService;
         _studentService = studentService;
+        _userProfile = userProfile;
     }
 
     public async Task LoadAsync()
     {
         IsLoading = true;
+        OnPropertyChanged(nameof(DisplayUserName));
+        OnPropertyChanged(nameof(GreetingText));
         try
         {
             var listTask    = _examAnalysis.GetAllExamSummariesAsync();
@@ -57,7 +91,9 @@ public partial class DashboardViewModel : ObservableObject
             foreach (var exam in list)
                 await EnrichDashboardMetricsAsync(exam);
 
-            Exams = new ObservableCollection<ExamSummaryDto>(list);
+            _allExams = list.ToList();
+            Exams = new ObservableCollection<ExamSummaryDto>(_allExams);
+            ApplyExamFilter();
 
             StudentCount = (await studentsTask).Count;
 
@@ -75,6 +111,29 @@ public partial class DashboardViewModel : ObservableObject
             IsLoading = false;
         }
     }
+
+    partial void OnSearchTextChanged(string value) => ApplyExamFilter();
+
+    private void ApplyExamFilter()
+    {
+        var query = (SearchText ?? string.Empty).Trim();
+        IEnumerable<ExamSummaryDto> filtered = _allExams;
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            filtered = _allExams.Where(exam =>
+                Contains(exam.ExamTitle, query) ||
+                Contains(exam.CourseName, query) ||
+                Contains(exam.ExamDate.ToString("dd MMM yyyy"), query) ||
+                Contains(exam.ExamDate.ToString("dd.MM.yyyy"), query));
+        }
+
+        FilteredExams = new ObservableCollection<ExamSummaryDto>(filtered);
+    }
+
+    private static bool Contains(string? source, string query) =>
+        !string.IsNullOrWhiteSpace(source) &&
+        source.Contains(query, StringComparison.CurrentCultureIgnoreCase);
 
     private async Task EnrichDashboardMetricsAsync(ExamSummaryDto exam)
     {

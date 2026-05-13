@@ -1,4 +1,4 @@
-namespace EduAnalytics.Business.Dtos;
+﻿namespace EduAnalytics.Business.Dtos;
 
 /// <summary>
 /// Bir sınavın genel istatistiklerini temsil eder.

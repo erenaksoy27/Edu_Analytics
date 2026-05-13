@@ -1,4 +1,4 @@
-namespace EduAnalytics.Business.Dtos;
+﻿namespace EduAnalytics.Business.Dtos;
 
 /// <summary>
 /// Öğrenci yönetimi ekranı için liste/satır görünümü.

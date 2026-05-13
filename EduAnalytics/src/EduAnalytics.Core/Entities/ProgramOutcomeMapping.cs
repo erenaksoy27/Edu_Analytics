@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Entities;
+﻿namespace EduAnalytics.Core.Entities;
 
 /// <summary>
 /// Program Çıktısı (PÇ) ↔ Öğrenim Çıktısı (ÖÇ) çoka-çok ilişkisi.

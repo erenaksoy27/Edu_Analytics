@@ -1,4 +1,4 @@
-using EduAnalytics.Business.Dtos;
+﻿using EduAnalytics.Business.Dtos;
 using EduAnalytics.UI.Services;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
@@ -49,25 +49,41 @@ public partial class ExamAnalysisViewModel
 
     private void BuildQuestionChart(List<QuestionAnalysisDto> questions)
     {
-        var (_, success, _, _, _, _, _, _) = ChartColors();
+        var (_, success, _, _, _, _, _, muted) = ChartColors();
         QuestionSuccessSeries = new ISeries[]
         {
             new ColumnSeries<double>
             {
                 Name = "Başarı %",
                 Values = questions.Select(q => q.SuccessRate).ToArray(),
-                Fill = new SolidColorPaint(success)
+                Fill = new SolidColorPaint(success),
+                Stroke = null,
+                MaxBarWidth = 56
             }
         };
 
         QuestionXAxes = new[]
         {
-            new Axis { Labels = questions.Select(q => $"S{q.QuestionNumber}").ToArray() }
+            new Axis
+            {
+                Labels = questions.Select(q => $"S{q.QuestionNumber}").ToArray(),
+                SeparatorsPaint = null,
+                LabelsPaint = new SolidColorPaint(muted),
+                TextSize = 13
+            }
         };
 
         QuestionYAxes = new[]
         {
-            new Axis { Name = "Başarı %", MinLimit = 0, MaxLimit = 100 }
+            new Axis
+            {
+                Name = "Başarı %",
+                MinLimit = 0,
+                MaxLimit = 100,
+                SeparatorsPaint = new SolidColorPaint(muted.WithAlpha(35)) { StrokeThickness = 1 },
+                LabelsPaint = new SolidColorPaint(muted),
+                TextSize = 13
+            }
         };
     }
 
@@ -104,15 +120,56 @@ public partial class ExamAnalysisViewModel
         };
     }
 
-    private void BuildSuccessRateDoughnut(double avgSuccess)
+    private void BuildSuccessRateDoughnut(double avgSuccess, IReadOnlyCollection<ItemAnalysisDto>? items = null)
     {
-        var (_, success, _, danger, _, _, _, _) = ChartColors();
+        var (_, success, _, danger, _, _, _, muted) = ChartColors();
+        var correct = items?.Sum(i => i.CorrectCount) ?? 0;
+        var wrong = items?.Sum(i => i.WrongCount) ?? 0;
+        var empty = items?.Sum(i => i.EmptyCount) ?? 0;
+        var total = correct + wrong + empty;
+
+        if (total == 0)
+        {
+            correct = (int)Math.Round(avgSuccess);
+            wrong = Math.Max(0, 100 - correct);
+            empty = 0;
+            total = correct + wrong;
+        }
+
+        CorrectAnswerCount = correct;
+        WrongAnswerCount = wrong;
+        EmptyAnswerCount = empty;
+        TotalAnswerCount = total;
+        OnPropertyChanged(nameof(CorrectAnswerRate));
+        OnPropertyChanged(nameof(WrongAnswerRate));
+        OnPropertyChanged(nameof(EmptyAnswerRate));
+
         SuccessRateDoughnutSeries = new ISeries[]
         {
-            new PieSeries<double> { Values = new double[] { avgSuccess }, Name = "Başarı",
-                                    Fill = new SolidColorPaint(success) },
-            new PieSeries<double> { Values = new double[] { 100 - avgSuccess }, Name = "Kayıp",
-                                    Fill = new SolidColorPaint(danger) }
+            new PieSeries<double>
+            {
+                Values = new double[] { correct },
+                Name = "Doğru",
+                Fill = new SolidColorPaint(success),
+                Stroke = null,
+                InnerRadius = 58
+            },
+            new PieSeries<double>
+            {
+                Values = new double[] { wrong },
+                Name = "Yanlış",
+                Fill = new SolidColorPaint(danger),
+                Stroke = null,
+                InnerRadius = 58
+            },
+            new PieSeries<double>
+            {
+                Values = new double[] { empty },
+                Name = "Boş",
+                Fill = new SolidColorPaint(muted.WithAlpha(105)),
+                Stroke = null,
+                InnerRadius = 58
+            }
         };
     }
 

@@ -1,6 +1,7 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.UI.Services;
+using EduAnalytics.UI.Services.AIAssistant;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EduAnalytics.UI.ViewModels;
@@ -12,6 +13,9 @@ public partial class MainViewModel : ObservableObject
     /// <summary>Sağ alt köşede bildirim göstermek için. Tüm VM'ler bunu kullanır.</summary>
     public ToastService Toasts { get; }
 
+    /// <summary>Uygulama genelinde açık kalan sağ kenar AI paneli.</summary>
+    public AIAssistantViewModel AIAssistant { get; }
+
     [ObservableProperty]
     private ObservableObject? _currentView;
 
@@ -22,7 +26,50 @@ public partial class MainViewModel : ObservableObject
     {
         _services = services;
         Toasts = toasts;
+        AIAssistant = new AIAssistantViewModel(
+            _services.GetRequiredService<IAIAssistantService>(),
+            toasts,
+            _services.GetRequiredService<IAppLogService>(),
+            GetCurrentAIContext);
         NavigateToDashboard();
+    }
+
+    private string? GetCurrentAIContext()
+    {
+        if (CurrentView is IAIContextProvider provider)
+        {
+            var viewContext = provider.GetAIContext();
+            if (!string.IsNullOrWhiteSpace(viewContext))
+                return viewContext;
+        }
+
+        return GetMenuAIContext();
+    }
+
+    private string GetMenuAIContext()
+        => ActiveMenu switch
+        {
+            "Dashboard" => "Ekran: Dashboard\nAmaç: sınavları, özet başarı durumunu ve sınav performansına geçişi izlemek.",
+            "ExamFromBank" => "Ekran: Sınav Oluştur\nAmaç: soru bankasındaki aktif soruları seçerek öğrenci kapsamı, puan ve denge kontrolüyle sınav oluşturmak.",
+            "ExamManagement" => "Ekran: Sınav Yönetimi\nAmaç: mevcut sınavları listelemek, analiz ekranına geçmek ve sınav yönetim işlemlerini yapmak.",
+            "QuestionBank" => "Ekran: Soru Bankası\nAmaç: soruları aramak, filtrelemek, detaylarını incelemek, oluşturmak ve düzenlemek.",
+            "SingleQuestionCreate" => "Ekran: Soru Oluşturma\nAmaç: tekil soru metni, seçenekler, puan, konu ve öğrenim çıktısı bağlantılarıyla soru bankasına yeni soru eklemek.",
+            "CommonStem" => "Ekran: Ortak Köklü Soru\nAmaç: ortak metne bağlı alt soruları birlikte oluşturmak ve yönetmek.",
+            "LearningOutcomes" => "Ekran: Öğrenim Çıktıları\nAmaç: ders bazlı öğrenim çıktısı tanımlarını yönetmek.",
+            "ProgramOutcomes" => "Ekran: Program Çıktıları\nAmaç: program çıktısı tanımlarını yönetmek.",
+            "ProgramOutcomeMapping" => "Ekran: PÇ - ÖÇ Eşleştirme\nAmaç: öğrenim çıktılarının program çıktılarına katkı seviyesini belirlemek.",
+            "ProgramOutcomeReport" => "Ekran: PÇ Başarı Raporu\nAmaç: program çıktısı başarılarını sınav ve ders verilerine göre yorumlamak.",
+            "Students" => "Ekran: Öğrenciler\nAmaç: öğrenci kayıtlarını, sınıf ve bölüm bilgilerini yönetmek.",
+            "AcademicStructure" => "Ekran: Akademik Yapı\nAmaç: program, ders ve akademik yapı tanımlarını düzenlemek.",
+            "Analiz" => "Ekran: Sınav Analizi\nAmaç: sınav kalitesi, başarı, güvenilirlik, madde analizi ve öğrenim çıktısı sonuçlarını yorumlamak.",
+            "Cevap" => "Ekran: Cevap Girişi\nAmaç: sınav cevaplarını ve puanlarını girerek analize hazır hale getirmek.",
+            _ => "Ekran: Genel\nAmaç: EduAnalytics uygulamasında ölçme değerlendirme işlemlerine destek olmak."
+        };
+
+    partial void OnCurrentViewChanged(ObservableObject? value)
+    {
+        if (AIAssistant.IsPanelOpen)
+            AIAssistant.RefreshContextLabel();
     }
 
     /// <summary>

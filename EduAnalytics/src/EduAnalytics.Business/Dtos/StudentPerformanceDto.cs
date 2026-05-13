@@ -1,4 +1,4 @@
-namespace EduAnalytics.Business.Dtos;
+﻿namespace EduAnalytics.Business.Dtos;
 
 /// <summary>
 /// Tek bir öğrencinin bir sınavdaki performansını temsil eder.

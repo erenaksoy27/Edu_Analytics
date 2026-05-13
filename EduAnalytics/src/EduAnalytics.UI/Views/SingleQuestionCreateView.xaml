@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:EduAnalytics.UI.ViewModels"
              xmlns:views="clr-namespace:EduAnalytics.UI.Views"
+             xmlns:ctl="clr-namespace:EduAnalytics.UI.Controls"
              xmlns:enums="clr-namespace:EduAnalytics.Core.Enums;assembly=EduAnalytics.Core"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:conv="clr-namespace:EduAnalytics.UI.Converters"
@@ -22,21 +23,20 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
         </Style>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Style="{StaticResource PageRootGridStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock Text="Yeni Soru Oluştur" Style="{StaticResource HeadingStyle}"/>
-            <TextBlock Text="Tek bir soru veya ortak gövdeli (ilişkili) bir soru grubu ekleyebilirsiniz."
-                       Style="{StaticResource PageSubtitleStyle}"/>
-        </StackPanel>
+        <ctl:PageHeader Grid.Row="0"
+                        Icon="HelpBoxMultipleOutline"
+                        Title="Yeni Soru Oluştur"
+                        Subtitle="Tek bir soru veya ortak gövdeli (ilişkili) bir soru grubu ekleyebilirsiniz."/>
 
         <TabControl Grid.Row="1">
 
@@ -48,22 +48,74 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+                    <ScrollViewer Style="{StaticResource PageScrollViewerStyle}" Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
                         <StackPanel Margin="0,0,0,16">
+                            <Border Style="{StaticResource FormFlowPanelStyle}">
+                                <UniformGrid Columns="4">
+                                    <StackPanel Style="{StaticResource FormFlowStepStyle}">
+                                        <Border Style="{StaticResource FormFlowNumberStyle}">
+                                            <TextBlock Text="1" Style="{StaticResource FormFlowNumberTextStyle}"/>
+                                        </Border>
+                                        <StackPanel Margin="8,0,0,0">
+                                            <TextBlock Text="Ders" Style="{StaticResource FormFlowTitleStyle}"/>
+                                            <TextBlock Text="Bağlamı seç" Style="{StaticResource FormFlowCaptionStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Style="{StaticResource FormFlowStepStyle}">
+                                        <Border Style="{StaticResource FormFlowNumberStyle}">
+                                            <TextBlock Text="2" Style="{StaticResource FormFlowNumberTextStyle}"/>
+                                        </Border>
+                                        <StackPanel Margin="8,0,0,0">
+                                            <TextBlock Text="Soru" Style="{StaticResource FormFlowTitleStyle}"/>
+                                            <TextBlock Text="Tip, metin ve puan" Style="{StaticResource FormFlowCaptionStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Style="{StaticResource FormFlowStepStyle}">
+                                        <Border Style="{StaticResource FormFlowNumberStyle}">
+                                            <TextBlock Text="3" Style="{StaticResource FormFlowNumberTextStyle}"/>
+                                        </Border>
+                                        <StackPanel Margin="8,0,0,0">
+                                            <TextBlock Text="ÖÇ bağlantısı" Style="{StaticResource FormFlowTitleStyle}"/>
+                                            <TextBlock Text="Ölçülen çıktıları işaretle" Style="{StaticResource FormFlowCaptionStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Style="{StaticResource FormFlowStepStyle}" Margin="0">
+                                        <Border Style="{StaticResource FormFlowNumberStyle}">
+                                            <TextBlock Text="4" Style="{StaticResource FormFlowNumberTextStyle}"/>
+                                        </Border>
+                                        <StackPanel Margin="8,0,0,0">
+                                            <TextBlock Text="Kaydet" Style="{StaticResource FormFlowTitleStyle}"/>
+                                            <TextBlock Text="Bankaya ekle" Style="{StaticResource FormFlowCaptionStyle}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </UniformGrid>
+                            </Border>
 
                             <!-- Temel Bilgiler -->
-                            <Border Style="{StaticResource CardStyle}">
+                            <Border Style="{StaticResource BentoCardStyle}">
                                 <StackPanel>
                                     <TextBlock Text="Temel Bilgiler" Style="{StaticResource CardHeaderStyle}"/>
+                                    <TextBlock Text="Ders seçimi, öğrenim çıktısı listesini ve raporlamadaki bağlamı belirler."
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               FontSize="12"
+                                               Margin="0,-8,0,14"
+                                               TextWrapping="Wrap"/>
                                     <TextBlock Text="Ders" Style="{StaticResource LabelStyle}"/>
                                     <ComboBox ItemsSource="{Binding Courses}"
                                               SelectedItem="{Binding SelectedCourse}"
-                                              DisplayMemberPath="Name"/>
+                                              DisplayMemberPath="Name"
+                                              Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding CourseError}"
+                                               Style="{StaticResource FormErrorTextStyle}"
+                                               Visibility="{Binding CourseError, Converter={StaticResource BoolToVisibility}}"/>
                                 </StackPanel>
                             </Border>
 
                             <!-- Soru Detayı -->
-                            <Border Style="{StaticResource CardStyle}" DataContext="{Binding Question}">
+                            <Border Style="{StaticResource BentoCardStyle}" DataContext="{Binding Question}">
                                 <StackPanel>
                                     <Grid Margin="0,0,0,14">
                                         <Grid.ColumnDefinitions>
@@ -117,13 +169,29 @@
                                                  VerticalAlignment="Center"/>
                                     </Grid>
 
+                                    <Border Style="{StaticResource CardSubtleStyle}" Margin="0,0,0,14">
+                                        <TextBlock Text="Test sorularında doğru şık seçimi zorunludur; klasik sorularda cevap anahtarı değerlendirme rehberi olarak saklanır."
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap"/>
+                                    </Border>
+
+                                    <TextBlock Text="{Binding MaxPointsError}"
+                                               Style="{StaticResource FormErrorTextStyle}"
+                                               Visibility="{Binding MaxPointsError, Converter={StaticResource BoolToVisibility}}"
+                                               Margin="0,-6,0,12"/>
+
                                     <TextBlock Text="Soru Metni" Style="{StaticResource LabelStyle}"/>
                                     <TextBox Text="{Binding QuestionText, UpdateSourceTrigger=PropertyChanged}"
                                              AcceptsReturn="True"
                                              TextWrapping="Wrap"
                                              MinHeight="72"
                                              VerticalContentAlignment="Top"
-                                             Margin="0,0,0,16"/>
+                                             Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding QuestionTextError}"
+                                               Style="{StaticResource FormErrorTextStyle}"
+                                               Visibility="{Binding QuestionTextError, Converter={StaticResource BoolToVisibility}}"
+                                               Margin="0,0,0,12"/>
 
                                     <!-- Çoktan Seçmeli -->
                                     <StackPanel Visibility="{Binding IsMultipleChoice, Converter={StaticResource BoolToVisibility}}">
@@ -168,6 +236,10 @@
                                             <TextBlock Grid.Column="0" Text="E" Style="{StaticResource OptionLabelStyle}"/>
                                             <TextBox Grid.Column="1" Text="{Binding OptionE, UpdateSourceTrigger=PropertyChanged}"/>
                                         </Grid>
+                                        <TextBlock Text="{Binding OptionsError}"
+                                                   Style="{StaticResource FormErrorTextStyle}"
+                                                   Visibility="{Binding OptionsError, Converter={StaticResource BoolToVisibility}}"
+                                                   Margin="0,-8,0,12"/>
 
                                         <TextBlock Text="Doğru Şık" Style="{StaticResource LabelStyle}"/>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
@@ -192,20 +264,20 @@
                             </Border>
 
                             <!-- Öğrenim Çıktıları -->
-                            <Border Style="{StaticResource CardStyle}" DataContext="{Binding Question}">
+                            <Border Style="{StaticResource BentoCardStyle}" DataContext="{Binding Question}">
                                 <StackPanel>
                                     <TextBlock Text="Öğrenim Çıktıları" Style="{StaticResource CardHeaderStyle}"/>
                                     <TextBlock Text="Bu soruyla ilişkilendirilecek öğrenim çıktılarını seçin."
-                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
                                                Margin="0,-8,0,12"/>
 
                                     <TextBox Text="{Binding LearningOutcomeFilter, UpdateSourceTrigger=PropertyChanged}"
                                              Margin="0,0,0,10"
                                              ToolTip="Kod veya isim ile filtreleyin"/>
 
-                                    <Border BorderBrush="{StaticResource BorderBrush}"
+                                    <Border BorderBrush="{DynamicResource BorderBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="6"
+                                            CornerRadius="{DynamicResource RadiusLg}"
                                             MinHeight="160"
                                             Margin="0,0,0,12">
                                         <ListBox ItemsSource="{Binding LearningOutcomesView}"
@@ -224,11 +296,11 @@
                                                         <StackPanel>
                                                             <TextBlock FontWeight="SemiBold"
                                                                        FontSize="12"
-                                                                       Foreground="{StaticResource PrimaryBrush}"
+                                                                       Foreground="{DynamicResource PrimaryBrush}"
                                                                        Text="{Binding Code}"/>
                                                             <TextBlock Text="{Binding Name}"
                                                                        FontSize="12"
-                                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                                       Foreground="{DynamicResource TextPrimaryBrush}"
                                                                        Margin="0,2,0,0"/>
                                                         </StackPanel>
                                                     </CheckBox>
@@ -248,19 +320,19 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Background="{StaticResource PrimaryLightBrush}"
-                                                        BorderBrush="{StaticResource PrimaryBrush}"
+                                                <Border Background="{DynamicResource PrimaryLightBrush}"
+                                                        BorderBrush="{DynamicResource PrimaryBrush}"
                                                         BorderThickness="1"
-                                                        CornerRadius="6"
+                                                        CornerRadius="{DynamicResource RadiusLg}"
                                                         Padding="8,5"
                                                         Margin="0,0,6,6">
                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                         <StackPanel>
-                                                            <TextBlock Foreground="{StaticResource PrimaryDarkBrush}"
+                                                            <TextBlock Foreground="{DynamicResource PrimaryDarkBrush}"
                                                                        FontSize="11"
                                                                        FontWeight="SemiBold"
                                                                        Text="{Binding Code}"/>
-                                                            <TextBlock Foreground="{StaticResource TextPrimaryBrush}"
+                                                            <TextBlock Foreground="{DynamicResource TextPrimaryBrush}"
                                                                        FontSize="11"
                                                                        Text="{Binding Name}"/>
                                                         </StackPanel>
@@ -269,7 +341,7 @@
                                                                           RelativeSource={RelativeSource AncestorType=Border, AncestorLevel=2}}"
                                                                 CommandParameter="{Binding}"
                                                                 Style="{StaticResource GhostButtonStyle}"
-                                                                Foreground="{StaticResource PrimaryDarkBrush}"
+                                                                Foreground="{DynamicResource PrimaryDarkBrush}"
                                                                 Padding="6,2"
                                                                 FontSize="11"
                                                                 FontWeight="Bold"
@@ -287,9 +359,10 @@
 
                     <!-- Footer -->
                     <Border Grid.Row="1"
-                            BorderBrush="{StaticResource BorderBrush}"
+                            Background="{DynamicResource CardBgBrush}"
+                            BorderBrush="{DynamicResource BorderSubtleBrush}"
                             BorderThickness="0,1,0,0"
-                            Padding="0,14,0,0"
+                            Padding="16"
                             Margin="0,8,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -300,11 +373,11 @@
                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                 <Border Style="{StaticResource AlertErrorStyle}"
                                         Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}">
-                                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#991B1B" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerEmphasisBrush}" TextWrapping="Wrap"/>
                                 </Border>
                                 <Border Style="{StaticResource AlertSuccessStyle}"
                                         Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}">
-                                    <TextBlock Text="{Binding SuccessMessage}" Foreground="#065F46" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding SuccessMessage}" Foreground="{DynamicResource SuccessEmphasisBrush}" TextWrapping="Wrap"/>
                                 </Border>
                             </StackPanel>
 

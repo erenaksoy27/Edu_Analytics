@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Business.Dtos;
@@ -149,7 +149,7 @@ public partial class AcademicStructureViewModel : ObservableObject
     private async Task DeleteProgramAsync(ProgramListDto? p)
     {
         if (p == null) return;
-        var confirm = System.Windows.MessageBox.Show(
+        var confirm = EduAnalytics.UI.Services.AppMessageBox.Show(
             $"'{p.Code} — {p.Name}' programını silmek istediğinize emin misiniz?",
             "Program Sil",
             System.Windows.MessageBoxButton.YesNo,
@@ -256,7 +256,7 @@ public partial class AcademicStructureViewModel : ObservableObject
     private async Task DeleteCourseAsync(CourseListDto? c)
     {
         if (c == null) return;
-        var confirm = System.Windows.MessageBox.Show(
+        var confirm = EduAnalytics.UI.Services.AppMessageBox.Show(
             $"'{c.Code} — {c.Name}' dersini silmek istediğinize emin misiniz?\n\nDersin tüm konuları otomatik silinir.",
             "Ders Sil",
             System.Windows.MessageBoxButton.YesNo,
@@ -356,7 +356,7 @@ public partial class AcademicStructureViewModel : ObservableObject
     private async Task DeleteTopicAsync(TopicListDto? t)
     {
         if (t == null) return;
-        var confirm = System.Windows.MessageBox.Show(
+        var confirm = EduAnalytics.UI.Services.AppMessageBox.Show(
             $"'Hafta {t.WeekNumber} — {t.Title}' konusunu silmek istediğinize emin misiniz?",
             "Konu Sil",
             System.Windows.MessageBoxButton.YesNo,

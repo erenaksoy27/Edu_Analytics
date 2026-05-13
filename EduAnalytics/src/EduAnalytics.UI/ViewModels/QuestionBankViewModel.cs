@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Business.Dtos;
@@ -231,7 +231,7 @@ public partial class QuestionBankViewModel : ObservableObject
     private async Task DeleteAsync(QuestionBankItemDto? item)
     {
         if (item == null) return;
-        var confirm = System.Windows.MessageBox.Show(
+        var confirm = EduAnalytics.UI.Services.AppMessageBox.Show(
             $"Soruyu silmek istediğinize emin misiniz?\n\n\"{item.QuestionText[..Math.Min(item.QuestionText.Length, 80)]}\"",
             "Soru Sil",
             System.Windows.MessageBoxButton.YesNo,

@@ -1,4 +1,4 @@
-namespace EduAnalytics.Business.Dtos;
+﻿namespace EduAnalytics.Business.Dtos;
 
 /// <summary>
 /// Bir konunun (Bologna çıktısı) sınıf genelinde ne kadar öğrenildiğini gösterir.

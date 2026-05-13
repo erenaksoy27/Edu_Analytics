@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Entities;
+﻿namespace EduAnalytics.Core.Entities;
 
 /// <summary>
 /// İlişkili (common-stem) soru grubu. Tek bir gövde (tablo, paragraf, şema) verilir,

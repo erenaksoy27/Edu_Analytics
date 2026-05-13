@@ -1,4 +1,4 @@
-using EduAnalytics.Core.Entities;
+﻿using EduAnalytics.Core.Entities;
 using EduAnalytics.Core.Enums;
 using EduAnalytics.DataAccess.Context;
 
@@ -11,7 +11,7 @@ namespace EduAnalytics.DataAccess.Seed;
 /// </summary>
 public static class DbInitializer
 {
-    private const bool ResetDatabaseOnStartup = true;
+    private static readonly bool ResetDatabaseOnStartup = false;
 
     public static void Seed(EduAnalyticsDbContext context)
     {

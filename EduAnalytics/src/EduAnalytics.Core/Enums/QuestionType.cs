@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Enums;
+﻿namespace EduAnalytics.Core.Enums;
 
 /// <summary>
 /// Soru tipini belirtir.

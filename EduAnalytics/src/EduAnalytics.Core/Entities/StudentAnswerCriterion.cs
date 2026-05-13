@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Entities;
+﻿namespace EduAnalytics.Core.Entities;
 
 /// <summary>
 /// Bir öğrencinin bir klasik soruya verdiği cevabın, tek bir kriterden aldığı puan.

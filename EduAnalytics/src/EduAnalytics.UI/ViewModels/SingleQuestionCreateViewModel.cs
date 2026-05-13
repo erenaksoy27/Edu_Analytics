@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -24,6 +24,7 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
     [ObservableProperty] private string? _errorMessage;
     [ObservableProperty] private string? _successMessage;
     [ObservableProperty] private bool _isSaving;
+    [ObservableProperty] private string? _courseError;
 
     /// <summary>İkinci sekme: ortak gövdeli (common-stem) soru grubu editörü.</summary>
     public QuestionGroupEditorViewModel GroupEditor { get; }
@@ -59,6 +60,7 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
 
     partial void OnSelectedCourseChanged(Course? value)
     {
+        CourseError = null;
         _ = ReloadTopicsAsync();
         Question.AvailableTopics.Clear();
         // Clear learning outcomes lists as well when course changes
@@ -93,9 +95,12 @@ public partial class SingleQuestionCreateViewModel : ObservableObject
     {
         ErrorMessage = null;
         SuccessMessage = null;
+        CourseError = null;
+        Question.ClearValidationErrors();
 
         if (SelectedCourse == null)
         {
+            CourseError = "Ders seçmelisiniz.";
             ErrorMessage = "Lütfen bir ders seçin.";
             return;
         }

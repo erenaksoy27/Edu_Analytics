@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Entities;
+﻿namespace EduAnalytics.Core.Entities;
 
 /// <summary>
 /// Ders konusu. Haftalık plana göre tutulur (WeekNumber). Konu ↔ ÖÇ bağı M2M ile.

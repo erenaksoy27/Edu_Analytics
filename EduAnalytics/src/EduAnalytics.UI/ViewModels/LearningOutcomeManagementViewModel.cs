@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -323,7 +323,7 @@ public partial class LearningOutcomeManagementViewModel : ObservableObject
     private async Task DeleteAsync(LearningOutcomeDto? lo)
     {
         if (lo == null) return;
-        var confirm = System.Windows.MessageBox.Show(
+        var confirm = EduAnalytics.UI.Services.AppMessageBox.Show(
             $"{lo.Code} — {lo.Name} silinsin mi?",
             "ÖÇ Sil",
             System.Windows.MessageBoxButton.YesNo,

@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
@@ -94,6 +94,42 @@ public class LevelToBrushConverter : IValueConverter
             "İYİ" => System.Windows.Application.Current.Resources["SuccessBrush"],
             _ => System.Windows.Application.Current.Resources["TextSecondaryBrush"]
         };
+    }
+
+    public object ConvertBack(object value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
+public class RateThresholdToBrushConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var rate = value switch
+        {
+            double d => d,
+            float f => f,
+            decimal m => (double)m,
+            int i => i,
+            _ => 0d
+        };
+
+        var resources = Application.Current.Resources;
+        if (rate >= 70) return resources["SuccessBrush"];
+        if (rate >= 50) return resources["WarningBrush"];
+        return resources["DangerBrush"];
+    }
+
+    public object ConvertBack(object value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
+public class FirstWordConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var text = value?.ToString() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+        return text.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? string.Empty;
     }
 
     public object ConvertBack(object value, Type targetType, object? parameter, CultureInfo culture)

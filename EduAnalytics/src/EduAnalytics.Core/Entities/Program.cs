@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Entities;
+﻿namespace EduAnalytics.Core.Entities;
 
 /// <summary>
 /// Akademik program (örn. "Tıp Fakültesi", "Bilgisayar Mühendisliği").

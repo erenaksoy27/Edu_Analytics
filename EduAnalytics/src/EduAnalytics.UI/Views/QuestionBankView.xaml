@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:EduAnalytics.UI.ViewModels"
              xmlns:views="clr-namespace:EduAnalytics.UI.Views"
+             xmlns:ctl="clr-namespace:EduAnalytics.UI.Controls"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:mi="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              d:DataContext="{d:DesignInstance Type=vm:QuestionBankViewModel}"
@@ -10,33 +11,29 @@
              mc:Ignorable="d"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
 
-    <Grid>
+    <Grid Style="{StaticResource PageRootGridStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,18">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <ctl:PageHeader Grid.Row="0"
+                        Icon="HelpBoxMultipleOutline"
+                        Title="Soru Bankası"
+                        Subtitle="Ders bazlı soru havuzunu yönetin. Aktif sorular sınav oluşturma akışında kullanılabilir.">
+            <ctl:PageHeader.Actions>
+                <Button Command="{Binding NavigateToCreateQuestionCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <mi:MaterialIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
+                        <TextBlock Text="Soru Ekle" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </ctl:PageHeader.Actions>
+        </ctl:PageHeader>
 
-            <StackPanel>
-                <TextBlock Text="Soru Bankası" Style="{StaticResource HeadingStyle}"/>
-                <TextBlock Text="Ders bazlı soru havuzunu yönetin. Aktif sorular sınav oluşturma akışında kullanılabilir."
-                           Style="{StaticResource PageSubtitleStyle}"/>
-            </StackPanel>
-
-            <Button Grid.Column="1"
-                    Content="Soru Ekle"
-                    Command="{Binding NavigateToCreateQuestionCommand}"
-                    Style="{StaticResource PrimaryButtonStyle}"
-                    VerticalAlignment="Top"/>
-        </Grid>
-
-        <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+        <Border Grid.Row="1" Style="{StaticResource BentoCardStyle}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -61,14 +58,14 @@
 
                 <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal">
                     <TextBlock Text="Tip" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <ComboBox SelectedItem="{Binding TypeFilter}" Width="116" Margin="0,0,18,0">
+                    <ComboBox SelectedItem="{Binding TypeFilter}" Width="148" Margin="0,0,18,0">
                         <sys:String>Tümü</sys:String>
                         <sys:String>Test</sys:String>
                         <sys:String>Klasik</sys:String>
                     </ComboBox>
 
                     <TextBlock Text="Durum" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <ComboBox SelectedItem="{Binding FilterStatus}" Width="116" Margin="0,0,18,0">
+                    <ComboBox SelectedItem="{Binding FilterStatus}" Width="148" Margin="0,0,18,0">
                         <sys:String>Tümü</sys:String>
                         <sys:String>Aktif</sys:String>
                         <sys:String>Pasif</sys:String>
@@ -91,20 +88,20 @@
                 <Border Style="{StaticResource AlertErrorStyle}"
                         Margin="0,0,0,8"
                         Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#991B1B" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerEmphasisBrush}" TextWrapping="Wrap"/>
                 </Border>
                 <Border Style="{StaticResource AlertSuccessStyle}"
                         Margin="0,0,0,8"
                         Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="{Binding SuccessMessage}" Foreground="#064E3B" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding SuccessMessage}" Foreground="{DynamicResource SuccessEmphasisBrush}" TextWrapping="Wrap"/>
                 </Border>
             </StackPanel>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Style="{StaticResource PageScrollViewerStyle}" Grid.Row="1" VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Questions}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Style="{StaticResource CardStyle}">
+                            <Border Style="{StaticResource BentoCardStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="34"/>
@@ -125,11 +122,11 @@
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Text" Value="☆"/>
-                                                    <Setter Property="Foreground" Value="{StaticResource SubtleBrush}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource SubtleBrush}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsFavorite}" Value="True">
                                                             <Setter Property="Text" Value="★"/>
-                                                            <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -139,23 +136,23 @@
 
                                     <StackPanel Grid.Column="1" Margin="4,0,18,0">
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                            <Border Background="{StaticResource PrimaryLightBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,6,0">
-                                                <TextBlock Text="{Binding Type}" Foreground="{StaticResource PrimaryBrush}" FontSize="11" FontWeight="SemiBold"/>
+                                            <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusLg}" Padding="7,3" Margin="0,0,6,0">
+                                                <TextBlock Text="{Binding Type}" Foreground="{DynamicResource PrimaryBrush}" FontSize="11" FontWeight="SemiBold"/>
                                             </Border>
-                                            <Border Background="{StaticResource PageBgBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,6,0">
-                                                <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}">
+                                            <Border Background="{DynamicResource PageBgBrush}" CornerRadius="{DynamicResource RadiusLg}" Padding="7,3" Margin="0,0,6,0">
+                                                <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}">
                                                     <Run Text="{Binding MaxPoints}"/>
                                                     <Run Text=" puan"/>
                                                 </TextBlock>
                                             </Border>
-                                            <Border Background="#FFFBEB"
-                                                    BorderBrush="#FCD34D"
+                                            <Border Background="{DynamicResource WarningSubtleBgBrush}"
+                                                    BorderBrush="{DynamicResource WarningSubtleBorderBrush}"
                                                     BorderThickness="1"
-                                                    CornerRadius="4"
+                                                    CornerRadius="{DynamicResource RadiusLg}"
                                                     Padding="7,3"
                                                     Margin="0,0,6,0"
                                                     Visibility="{Binding UsedInExamCount, Converter={StaticResource BoolToVisibility}}">
-                                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="#92400E">
+                                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource WarningSubtleTextBrush}">
                                                     <Run Text="{Binding UsedInExamCount}"/>
                                                     <Run Text=" sınavda kullanıldı"/>
                                                 </TextBlock>
@@ -164,7 +161,7 @@
 
                                         <TextBlock Text="{Binding QuestionText}"
                                                    TextWrapping="Wrap"
-                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
                                                    FontSize="14"
                                                    Margin="0,0,0,8"/>
 
@@ -178,13 +175,13 @@
                                             </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Border Background="#FFFBEB"
-                                                            BorderBrush="#FDE68A"
+                                                    <Border Background="{DynamicResource WarningSubtleBgBrush}"
+                                                            BorderBrush="{DynamicResource WarningSubtleBorderBrush}"
                                                             BorderThickness="1"
-                                                            CornerRadius="4"
+                                                            CornerRadius="{DynamicResource RadiusLg}"
                                                             Padding="7,3"
                                                             Margin="0,0,5,5">
-                                                        <TextBlock Text="{Binding}" FontSize="11" Foreground="#78350F" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{Binding}" FontSize="11" Foreground="{DynamicResource WarningSubtleTextBrush}" FontWeight="SemiBold"/>
                                                     </Border>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
@@ -198,13 +195,13 @@
                                             </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Border Background="{StaticResource PrimaryLightBrush}"
-                                                            BorderBrush="{StaticResource PrimaryBrush}"
+                                                    <Border Background="{DynamicResource PrimaryLightBrush}"
+                                                            BorderBrush="{DynamicResource PrimaryBrush}"
                                                             BorderThickness="1"
-                                                            CornerRadius="4"
+                                                            CornerRadius="{DynamicResource RadiusLg}"
                                                             Padding="6,3"
                                                             Margin="0,0,5,4">
-                                                        <TextBlock Text="{Binding}" Foreground="{StaticResource PrimaryDarkBrush}" FontSize="11" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{Binding}" Foreground="{DynamicResource PrimaryDarkBrush}" FontSize="11" FontWeight="SemiBold"/>
                                                     </Border>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
@@ -216,18 +213,18 @@
                                                           RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}"
                                                 Margin="0,0,6,0"
-                                                Padding="11,6"
+                                                Padding="6,11"
                                                 BorderThickness="1">
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
                                                     <Setter Property="Content" Value="Pasif"/>
-                                                    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsActive}" Value="True">
                                                             <Setter Property="Content" Value="Aktif"/>
-                                                            <Setter Property="Background" Value="#ECFDF5"/>
-                                                            <Setter Property="Foreground" Value="#047857"/>
-                                                            <Setter Property="BorderBrush" Value="#A7F3D0"/>
+                                                            <Setter Property="Background" Value="{DynamicResource SuccessSubtleBgBrush}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource SuccessSubtleBorderBrush}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -260,7 +257,7 @@
                         Style="{StaticResource EmptyStateStyle}"
                         Visibility="{Binding Questions.Count, Converter={StaticResource CollectionEmptyToVisibility}}">
                 <mi:MaterialIcon Kind="InboxOutline" Width="48" Height="48"
-                                 Foreground="{StaticResource SubtleBrush}"
+                                 Foreground="{DynamicResource SubtleBrush}"
                                  HorizontalAlignment="Center"/>
                 <TextBlock Text="Soru bulunamadı" Style="{StaticResource EmptyStateTitleStyle}"/>
                 <TextBlock Text="Filtreleri değiştirin veya yeni soru ekleyin."

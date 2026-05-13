@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Business.Dtos;
@@ -37,12 +37,20 @@ public partial class ExamFromBankViewModel : ObservableObject
     // Soru havuzu (sol kolon)
     [ObservableProperty] private ObservableCollection<QuestionBankItemDto> _bankPool = new();
     [ObservableProperty] private string _bankSearchText = string.Empty;
+    [ObservableProperty] private ObservableCollection<QuestionTypeFilterOption> _poolQuestionTypeFilters = new()
+    {
+        new QuestionTypeFilterOption("Tümü", null),
+        new QuestionTypeFilterOption("Test", QuestionType.MultipleChoice),
+        new QuestionTypeFilterOption("Klasik", QuestionType.OpenEnded)
+    };
+    [ObservableProperty] private QuestionTypeFilterOption? _selectedPoolQuestionTypeFilter;
     [ObservableProperty] private ObservableCollection<LearningOutcomeDto> _availableOutcomes = new();
     [ObservableProperty] private QuestionBankItemDto? _detailQuestion;
     [ObservableProperty] private QuestionBankCreateModel? _detailQuestionModel;
 
     // Seçili sorular (sağ kolon)
     [ObservableProperty] private ObservableCollection<QuestionBankItemDto> _selectedQuestions = new();
+    [ObservableProperty] private decimal _selectedQuestionsTotalPoints;
 
     // Denge önizlemesi
     [ObservableProperty] private ExamBalanceReportDto? _balancePreview;
@@ -57,6 +65,10 @@ public partial class ExamFromBankViewModel : ObservableObject
     [ObservableProperty] private bool _isSaving;
     [ObservableProperty] private string? _errorMessage;
     [ObservableProperty] private string? _successMessage;
+    [ObservableProperty] private string? _courseError;
+    [ObservableProperty] private string? _titleError;
+    [ObservableProperty] private string? _durationMinutesError;
+    [ObservableProperty] private string? _selectedQuestionsError;
 
     public ExamFromBankViewModel(
         IExamCrudService examService,
@@ -68,6 +80,7 @@ public partial class ExamFromBankViewModel : ObservableObject
         _bankService = bankService;
         _loService = loService;
         _balanceService = balanceService;
+        SelectedPoolQuestionTypeFilter = PoolQuestionTypeFilters.FirstOrDefault();
     }
 
     public async Task LoadAsync()
@@ -169,9 +182,18 @@ public partial class ExamFromBankViewModel : ObservableObject
 
     partial void OnSelectedCourseChanged(Course? value)
     {
+        CourseError = null;
         SelectedQuestions.Clear();
+        RefreshSelectedPointsState();
         _ = ReloadAfterCourseChangeAsync();
     }
+
+    partial void OnTitleChanged(string value) => TitleError = null;
+    partial void OnDurationMinutesChanged(int value) => DurationMinutesError = null;
+    partial void OnSelectedQuestionsTotalPointsChanged(decimal value) =>
+        OnPropertyChanged(nameof(SelectedQuestionsPointSummary));
+
+    public string SelectedQuestionsPointSummary => $"Toplam: {SelectedQuestionsTotalPoints:0.##} / 100 puan";
 
     /// <summary>Sıralı async — DbContext'e paralel sorgu gitmeyecek şekilde.</summary>
     private async Task ReloadAfterCourseChangeAsync()
@@ -183,6 +205,11 @@ public partial class ExamFromBankViewModel : ObservableObject
     partial void OnExamTypeChanged(ExamType value)
     {
         _ = ReloadOutcomesAsync();
+    }
+
+    partial void OnSelectedPoolQuestionTypeFilterChanged(QuestionTypeFilterOption? value)
+    {
+        _ = ReloadPoolAsync();
     }
 
     private async Task ReloadOutcomesAsync()
@@ -215,6 +242,7 @@ public partial class ExamFromBankViewModel : ObservableObject
             {
                 CourseId = SelectedCourse.Id,
                 IsActive = true,
+                Type = SelectedPoolQuestionTypeFilter?.Type,
                 SearchText = string.IsNullOrWhiteSpace(BankSearchText) ? null : BankSearchText
             };
             var result = await _bankService.SearchAsync(filter);
@@ -269,8 +297,10 @@ public partial class ExamFromBankViewModel : ObservableObject
     private async Task AddToExamAsync(QuestionBankItemDto? q)
     {
         if (q == null) return;
+        SelectedQuestionsError = null;
         SelectedQuestions.Add(q);
         BankPool.Remove(q);
+        RefreshSelectedPointsState();
         await UpdateBalancePreviewAsync();
     }
 
@@ -279,6 +309,9 @@ public partial class ExamFromBankViewModel : ObservableObject
     {
         if (q == null) return;
         SelectedQuestions.Remove(q);
+        RefreshSelectedPointsState();
+        if (SelectedQuestions.Count == 0)
+            SelectedQuestionsError = "En az bir soru seçilmeli.";
         BankPool.Add(q);
         await UpdateBalancePreviewAsync();
     }
@@ -300,6 +333,69 @@ public partial class ExamFromBankViewModel : ObservableObject
             SelectedQuestions.Move(idx, idx + 1);
     }
 
+    public bool TryUpdateSelectedQuestionPoints(QuestionBankItemDto? question, decimal newPoints)
+    {
+        if (question == null || !SelectedQuestions.Contains(question))
+            return false;
+
+        var normalizedPoints = Math.Round(newPoints, 2);
+        if (normalizedPoints <= 0)
+        {
+            SelectedQuestionsError = "Soru puanı 0'dan büyük olmalı.";
+            return false;
+        }
+
+        var otherTotal = SelectedQuestions
+            .Where(q => q.Id != question.Id)
+            .Sum(q => q.MaxPoints);
+        var attemptedTotal = Math.Round(otherTotal + normalizedPoints, 2);
+
+        if (attemptedTotal > 100m)
+        {
+            SelectedQuestionsError =
+                $"Toplam puan 100'ü aşamaz. Girilen değerle toplam {attemptedTotal:0.##} puan oluyor.";
+            return false;
+        }
+
+        question.MaxPoints = normalizedPoints;
+        RefreshSelectedPointsState();
+        ErrorMessage = null;
+        SuccessMessage = null;
+        return true;
+    }
+
+    private void RefreshSelectedPointsState()
+    {
+        SelectedQuestionsTotalPoints = Math.Round(SelectedQuestions.Sum(q => q.MaxPoints), 2);
+
+        if (SelectedQuestions.Count == 0)
+        {
+            if (SelectedQuestionsError != "En az bir soru seçilmeli.")
+                SelectedQuestionsError = null;
+            return;
+        }
+
+        if (SelectedQuestions.Any(q => q.MaxPoints <= 0))
+        {
+            SelectedQuestionsError = "Soru puanları 0'dan büyük olmalı.";
+            return;
+        }
+
+        if (SelectedQuestionsTotalPoints > 100m)
+        {
+            SelectedQuestionsError =
+                $"Toplam puan 100'ü aşamaz. Şu an {SelectedQuestionsTotalPoints:0.##} puan.";
+            return;
+        }
+
+        if (SelectedQuestionsError is not null &&
+            (SelectedQuestionsError.Contains("puan", StringComparison.OrdinalIgnoreCase) ||
+             SelectedQuestionsError.Contains("soru seçilmeli", StringComparison.OrdinalIgnoreCase)))
+        {
+            SelectedQuestionsError = null;
+        }
+    }
+
     /// <summary>
     /// Seçili sorulara 100/N puan paylaştırır. Bu değer kayıtta OverrideMaxPoints olur;
     /// soru bankasındaki orijinal puan korunur.
@@ -314,13 +410,18 @@ public partial class ExamFromBankViewModel : ObservableObject
         }
 
         var pointsPerQuestion = Math.Round(100m / SelectedQuestions.Count, 2);
-
         var snapshot = SelectedQuestions.ToList();
-        foreach (var q in snapshot)
-            q.MaxPoints = pointsPerQuestion;
+        for (var i = 0; i < snapshot.Count; i++)
+        {
+            var points = i == snapshot.Count - 1
+                ? 100m - pointsPerQuestion * (snapshot.Count - 1)
+                : pointsPerQuestion;
+            snapshot[i].MaxPoints = Math.Round(points, 2);
+        }
 
         SelectedQuestions = new ObservableCollection<QuestionBankItemDto>(snapshot);
-        SuccessMessage = $"{snapshot.Count} soruya {pointsPerQuestion} puan paylaştırıldı.";
+        RefreshSelectedPointsState();
+        SuccessMessage = $"{snapshot.Count} sorunun toplam puanı 100 olacak şekilde paylaştırıldı.";
         ErrorMessage = null;
     }
 
@@ -349,9 +450,12 @@ public partial class ExamFromBankViewModel : ObservableObject
         ErrorMessage = null;
         SuccessMessage = null;
 
-        if (SelectedCourse == null) { ErrorMessage = "Ders seçmelisiniz."; return; }
-        if (string.IsNullOrWhiteSpace(Title)) { ErrorMessage = "Sınav başlığı boş olamaz."; return; }
-        if (SelectedQuestions.Count == 0) { ErrorMessage = "En az bir soru seçilmeli."; return; }
+        if (!ValidateForm())
+            return;
+
+        var selectedCourse = SelectedCourse;
+        if (selectedCourse == null)
+            return;
 
         var studentModels = AllStudents
             .Where(s => s.IsSelected)
@@ -369,7 +473,7 @@ public partial class ExamFromBankViewModel : ObservableObject
             var userId = await _examService.GetDefaultUserIdAsync();
             var model = new ExamFromBankCreateModel
             {
-                CourseId = SelectedCourse.Id,
+                CourseId = selectedCourse.Id,
                 Title = Title,
                 ExamDate = ExamDate,
                 DurationMinutes = DurationMinutes,
@@ -393,6 +497,7 @@ public partial class ExamFromBankViewModel : ObservableObject
 
             Title = string.Empty;
             SelectedQuestions.Clear();
+            RefreshSelectedPointsState();
             BalancePreview = null;
             
             foreach (var s in AllStudents) s.IsSelected = false;
@@ -411,5 +516,52 @@ public partial class ExamFromBankViewModel : ObservableObject
         {
             IsSaving = false;
         }
+    }
+
+    private void ClearFormErrors()
+    {
+        CourseError = null;
+        TitleError = null;
+        DurationMinutesError = null;
+        SelectedQuestionsError = null;
+    }
+
+    private bool ValidateForm()
+    {
+        ClearFormErrors();
+
+        if (SelectedCourse == null)
+        {
+            CourseError = "Ders seçmelisiniz.";
+            ErrorMessage = CourseError;
+            return false;
+        }
+        if (string.IsNullOrWhiteSpace(Title))
+        {
+            TitleError = "Sınav başlığı zorunlu.";
+            ErrorMessage = "Sınav başlığı boş olamaz.";
+            return false;
+        }
+        if (DurationMinutes <= 0)
+        {
+            DurationMinutesError = "Süre 0'dan büyük olmalı.";
+            ErrorMessage = DurationMinutesError;
+            return false;
+        }
+        if (SelectedQuestions.Count == 0)
+        {
+            SelectedQuestionsError = "En az bir soru seçilmeli.";
+            ErrorMessage = SelectedQuestionsError;
+            return false;
+        }
+
+        RefreshSelectedPointsState();
+        if (SelectedQuestions.Any(q => q.MaxPoints <= 0) || SelectedQuestionsTotalPoints > 100m)
+        {
+            ErrorMessage = SelectedQuestionsError;
+            return false;
+        }
+
+        return true;
     }
 }

@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using EduAnalytics.Core.Enums;
 
 namespace EduAnalytics.UI.ViewModels;

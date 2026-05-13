@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -146,7 +146,7 @@ public partial class StudentManagementViewModel : ObservableObject
     private async Task DeleteAsync(StudentDto? student)
     {
         if (student == null) return;
-        var confirm = System.Windows.MessageBox.Show(
+        var confirm = EduAnalytics.UI.Services.AppMessageBox.Show(
             $"'{student.StudentNumber} — {student.FullName}' öğrencisini silmek istediğinize emin misiniz?",
             "Öğrenci Sil",
             System.Windows.MessageBoxButton.YesNo,

@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Entities;
+﻿namespace EduAnalytics.Core.Entities;
 
 /// <summary>
 /// Konu (Topic) ↔ Öğrenim Çıktısı (ÖÇ) çoka-çok ilişkisi.

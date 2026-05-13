@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Entities;
+﻿namespace EduAnalytics.Core.Entities;
 
 /// <summary>
 /// Sınav (Exam) ↔ Soru Bankası (Question) çoka-çok ilişkisi.

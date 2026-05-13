@@ -3,30 +3,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:EduAnalytics.UI.ViewModels"
              xmlns:views="clr-namespace:EduAnalytics.UI.Views"
+             xmlns:ctl="clr-namespace:EduAnalytics.UI.Controls"
              d:DataContext="{d:DesignInstance Type=vm:LearningOutcomeManagementViewModel}"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
 
-    <Grid>
+    <Grid Style="{StaticResource PageRootGridStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Başlık -->
-        <Grid Grid.Row="0" Margin="0,0,0,16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel>
-                <TextBlock Text="Öğrenim Çıktısı (ÖÇ) Yönetimi" Style="{StaticResource HeadingStyle}"/>
-                <TextBlock Text="Ders bazlı öğrenim çıktılarını kod ve açıklama olarak tanımlayın. Kod alanına yalnızca 1, 2, 3 gibi sıra numarası girmeniz yeterlidir; sistem kayıt sırasında bunları otomatik olarak ÖÇ-1, ÖÇ-2, ÖÇ-3 biçimine çevirir."
-                           Foreground="{StaticResource TextSecondaryBrush}"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+        <ctl:PageHeader Grid.Row="0"
+                        Icon="Target"
+                        Title="Öğrenim Çıktısı (ÖÇ) Yönetimi"
+                        Subtitle="Ders bazlı öğrenim çıktılarını kod ve açıklama olarak tanımlayın. Kod alanına yalnızca 1, 2, 3 gibi sıra numarası girmeniz yeterlidir; sistem kayıt sırasında bunları otomatik olarak ÖÇ-1, ÖÇ-2, ÖÇ-3 biçimine çevirir.">
+            <ctl:PageHeader.Actions>
+                <StackPanel Orientation="Horizontal">
                 <Button Content="Şablon İndir"
                         Command="{Binding DownloadExcelTemplateCommand}"
                         Style="{StaticResource SecondaryButtonStyle}"
@@ -36,11 +31,12 @@
                         Command="{Binding ImportExcelCommand}"
                         Style="{StaticResource PrimaryButtonStyle}"
                         ToolTip="Excel'deki öğrenim çıktılarını ekle veya aynı kod varsa güncelle"/>
-            </StackPanel>
-        </Grid>
+                </StackPanel>
+            </ctl:PageHeader.Actions>
+        </ctl:PageHeader>
 
         <!-- Form alanı -->
-        <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+        <Border Grid.Row="1" Style="{StaticResource BentoCardStyle}">
             <StackPanel>
                 <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
@@ -98,22 +94,22 @@
                 <Border Style="{StaticResource AlertErrorStyle}"
                         Margin="0,12,0,0"
                         Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#991B1B" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerEmphasisBrush}" TextWrapping="Wrap"/>
                 </Border>
                 <Border Style="{StaticResource AlertSuccessStyle}"
                         Margin="0,12,0,0"
                         Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="{Binding SuccessMessage}" Foreground="#064E3B" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding SuccessMessage}" Foreground="{DynamicResource SuccessEmphasisBrush}" TextWrapping="Wrap"/>
                 </Border>
             </StackPanel>
         </Border>
 
         <!-- Liste -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Style="{StaticResource PageScrollViewerStyle}" Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <ItemsControl ItemsSource="{Binding LearningOutcomes}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource CardStyle}" Padding="16">
+                        <Border Style="{StaticResource BentoCardStyle}" Padding="16">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="80"/>
@@ -122,9 +118,9 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Border Grid.Column="0" Background="{StaticResource PrimaryLightBrush}" CornerRadius="6" Padding="8,6"
+                                <Border Grid.Column="0" Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusLg}" Padding="8,6"
                                         VerticalAlignment="Top" HorizontalAlignment="Left">
-                                    <TextBlock Text="{Binding Code}" Foreground="{StaticResource PrimaryBrush}"
+                                    <TextBlock Text="{Binding Code}" Foreground="{DynamicResource PrimaryBrush}"
                                                FontWeight="Bold" FontSize="14"/>
                                 </Border>
 
@@ -135,12 +131,12 @@
                                                TextWrapping="Wrap"
                                                Margin="0,4,0,0"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                        <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}">
+                                        <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}">
                                             <Run Text="{Binding TopicCount}"/>
                                             <Run Text=" konu"/>
                                         </TextBlock>
-                                        <TextBlock FontSize="11" Foreground="{StaticResource SubtleBrush}" Margin="6,0">·</TextBlock>
-                                        <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}">
+                                        <TextBlock FontSize="11" Foreground="{DynamicResource SubtleBrush}" Margin="6,0">·</TextBlock>
+                                        <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}">
                                             <Run Text="{Binding QuestionCount}"/>
                                             <Run Text=" soru"/>
                                         </TextBlock>

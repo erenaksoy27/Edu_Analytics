@@ -3,6 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:EduAnalytics.UI.ViewModels"
              xmlns:views="clr-namespace:EduAnalytics.UI.Views"
+             xmlns:ctl="clr-namespace:EduAnalytics.UI.Controls"
+             xmlns:conv="clr-namespace:EduAnalytics.UI.Converters"
+             xmlns:mi="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
              d:DataContext="{d:DesignInstance Type=vm:ExamAnalysisViewModel}"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,48 +13,218 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
 
     <UserControl.Resources>
+        <conv:DonutSegmentGeometryConverter x:Key="DonutSegmentGeometryConverter"/>
+
         <Style x:Key="StatValueStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="22"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
 
         <Style x:Key="StatCaptionStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,4,0,0"/>
         </Style>
+
+        <Style x:Key="InsightCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InfoSubtleBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1,1,1,3"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource RadiusLg}"/>
+            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Severity}" Value="Success">
+                    <Setter Property="BorderBrush" Value="{DynamicResource SuccessSubtleBorderBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Severity}" Value="Warning">
+                    <Setter Property="BorderBrush" Value="{DynamicResource WarningSubtleBorderBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource WarningSubtleBgBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Severity}" Value="Critical">
+                    <Setter Property="BorderBrush" Value="{DynamicResource DangerSubtleBorderBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource DangerSubtleBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SummaryCapsLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubtleBrush}"/>
+        </Style>
+
+        <Style x:Key="SummaryMonoValueStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Geist Mono, JetBrains Mono, Consolas, Menlo, monospace"/>
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="LineHeight" Value="32"/>
+        </Style>
+
+        <Style x:Key="SummaryAiBandStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource AiSummaryBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AiSummaryBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="16,14"/>
+            <Setter Property="Margin" Value="0,0,0,24"/>
+        </Style>
+
+        <Style x:Key="SummaryAiIconStyle" TargetType="Border">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+            <Setter Property="Effect" Value="{DynamicResource ShadowSm}"/>
+        </Style>
+
+        <Style x:Key="SummaryIconBoxStyle" TargetType="Border">
+            <Setter Property="Width" Value="26"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="CornerRadius" Value="7"/>
+            <Setter Property="Background" Value="{DynamicResource ChipBgBrush}"/>
+        </Style>
+
+        <Style x:Key="SummaryHealthCardStyle" TargetType="Border" BasedOn="{StaticResource CardStyle}">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Effect" Value="{DynamicResource ShadowSm}"/>
+        </Style>
+
+        <Style x:Key="SummarySignalCardStyle" TargetType="Border">
+            <Setter Property="Padding" Value="14,16"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource SurfaceSunkenBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Severity}" Value="Success">
+                    <Setter Property="Background" Value="{DynamicResource SuccessSubtleBgBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource SuccessSubtleBorderBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Severity}" Value="Warning">
+                    <Setter Property="Background" Value="{DynamicResource WarningSubtleBgBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource WarningSubtleBorderBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Severity}" Value="Critical">
+                    <Setter Property="Background" Value="{DynamicResource DangerSubtleBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DangerSubtleBorderBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SummaryPanelStyle" TargetType="Border" BasedOn="{StaticResource CardStyle}">
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="18,20,20,20"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+
+        <Style x:Key="SummaryStatStripStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+
+        <Style x:Key="SummaryStatItemStyle" TargetType="Border">
+            <Setter Property="Padding" Value="22,17"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+        </Style>
+
+        <Style x:Key="SummaryPanelTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        </Style>
+
+        <Style x:Key="SummaryPanelSubtitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubtleBrush}"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+        </Style>
+
+        <Style x:Key="SummaryPillStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource ChipBgBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Margin" Value="6,0,0,0"/>
+        </Style>
+
+        <Style x:Key="SummaryPillActiveStyle" TargetType="Border" BasedOn="{StaticResource SummaryPillStyle}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+        </Style>
+
+        <Style x:Key="SummaryPillToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="{DynamicResource ChipBgBrush}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubtleBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Margin" Value="6,0,0,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{DynamicResource RadiusLg}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource AiSummaryBorderBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Style="{StaticResource PageRootGridStyle}">
+        <ScrollViewer Style="{StaticResource PageScrollViewerStyle}" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+        <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Üst Şerit: Başlık + Eylemler -->
-        <Grid Grid.Row="0" Margin="0,0,0,18">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0">
-                <TextBlock Text="{Binding Summary.ExamTitle, FallbackValue='Sınav Analizi'}"
-                           Style="{StaticResource HeadingStyle}"/>
+        <ctl:PageHeader Grid.Row="0"
+                        Icon="ChartLineVariant"
+                        Title="{Binding Summary.ExamTitle, FallbackValue='Sınav Analizi'}"
+                        Subtitle="{Binding ExamAnalysisSubtitle}">
+            <ctl:PageHeader.Actions>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Summary.CourseName}"
-                               Foreground="{StaticResource TextSecondaryBrush}"/>
-                    <TextBlock Text=" · " Foreground="{StaticResource SubtleBrush}"/>
-                    <TextBlock Text="{Binding Summary.ExamDate, StringFormat='{}{0:dd.MM.yyyy}'}"
-                               Foreground="{StaticResource TextSecondaryBrush}"/>
-                </StackPanel>
-            </StackPanel>
-
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Content="AI ile Yorumla"
+                        Command="{Binding DataContext.AIAssistant.StartPromptCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        CommandParameter="Bu sınavın genel analizini; güvenilirlik, madde kalitesi, öğrenim çıktısı performansı ve sınav dengesi açısından yorumla."
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Margin="0,0,8,0"/>
                 <Button Content="Rapor Çıktısı (PDF)"
                         Command="{Binding ExportReportCommand}"
                         Style="{StaticResource SecondaryButtonStyle}"
@@ -59,127 +232,425 @@
                 <Button Content="Cevap Girişi"
                         Command="{Binding OpenAnswerEntryCommand}"
                         Style="{StaticResource PrimaryButtonStyle}"/>
-            </StackPanel>
+                </StackPanel>
+            </ctl:PageHeader.Actions>
+        </ctl:PageHeader>
+
+        <UniformGrid Grid.Row="1" Rows="1" Columns="4" Margin="0,0,0,18">
+            <Border Style="{StaticResource MetricCardStyle}" Margin="0,0,14,0">
+                <StackPanel>
+                    <mi:MaterialIcon Kind="TrendingUp" Width="22" Height="22"
+                                     Foreground="{DynamicResource SuccessBrush}"/>
+                    <TextBlock Style="{StaticResource MetricValueStyle}"
+                               Foreground="{DynamicResource SuccessBrush}"
+                               Margin="0,10,0,0">
+                        <Run Text="%"/>
+                        <Run Text="{Binding Summary.AverageSuccessRate, StringFormat={}{0:N1}}"/>
+                    </TextBlock>
+                    <TextBlock Text="Ort. Başarı" Style="{StaticResource MetricLabelStyle}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource MetricCardStyle}" Margin="0,0,14,0">
+                <StackPanel>
+                    <mi:MaterialIcon Kind="Pulse" Width="22" Height="22"
+                                     Foreground="{DynamicResource PrimaryBrush}"/>
+                    <TextBlock Text="{Binding Summary.CronbachAlpha, StringFormat={}{0:N3}}"
+                               Style="{StaticResource MetricValueStyle}"
+                               Margin="0,10,0,0"/>
+                    <TextBlock Text="Cronbach α" Style="{StaticResource MetricLabelStyle}"/>
+                    <TextBlock Text="{Binding Summary.CronbachAlphaInterpretation}"
+                               Style="{StaticResource CaptionStyle}"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource MetricCardStyle}" Margin="0,0,14,0">
+                <StackPanel>
+                    <mi:MaterialIcon Kind="ChartBar" Width="22" Height="22"
+                                     Foreground="{DynamicResource WarningBrush}"/>
+                    <TextBlock Text="{Binding Summary.AverageDifficultyIndex, StringFormat={}{0:N3}}"
+                               Style="{StaticResource MetricValueStyle}"
+                               Margin="0,10,0,0"/>
+                    <TextBlock Text="Ort. Güçlük (p)" Style="{StaticResource MetricLabelStyle}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource MetricCardStyle}">
+                <StackPanel>
+                    <mi:MaterialIcon Kind="AlertOutline" Width="22" Height="22"
+                                     Foreground="{DynamicResource DangerBrush}"/>
+                    <TextBlock Style="{StaticResource MetricValueStyle}"
+                               Foreground="{DynamicResource DangerBrush}"
+                               Margin="0,10,0,0">
+                        <Run Text="%"/>
+                        <Run Text="{Binding Summary.LowestLearningOutcomeSuccessRate, StringFormat={}{0:N1}}"/>
+                    </TextBlock>
+                    <TextBlock Text="En Düşük ÖÇ" Style="{StaticResource MetricLabelStyle}"/>
+                    <TextBlock Text="{Binding Summary.LowestLearningOutcomeName}"
+                               Style="{StaticResource CaptionStyle}"
+                               Margin="0,2,0,0"
+                               TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!-- AI destekli analiz kokpiti -->
+        <Grid Grid.Row="2" Margin="0,0,0,16">
+            <Border Style="{StaticResource BentoCardStyle}"
+                    Margin="0"
+                    Padding="16">
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="AI Destekli Tanı"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Sınav kalitesini etkileyen ana sinyaller"
+                                       Style="{StaticResource CaptionStyle}"
+                                       Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <Button Grid.Column="1"
+                                Content="Paneli Aç"
+                                Command="{Binding DataContext.AIAssistant.TogglePanelCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Style="{StaticResource GhostButtonStyle}"
+                                Padding="10,5"
+                                VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <ItemsControl ItemsSource="{Binding ExecutiveInsights}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="1" Columns="3"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource InsightCardStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding Value}"
+                                                   FontSize="26"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   Margin="0,6,0,4"/>
+                                        <TextBlock Text="{Binding Detail}"
+                                                   TextWrapping="Wrap"
+                                                   LineHeight="17"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
         </Grid>
 
         <!-- Sekmeler -->
-        <TabControl Grid.Row="1">
+        <TabControl Grid.Row="3">
 
             <!-- ═══ SEKME 1: ÖZET ═══ -->
             <TabItem Header="Özet">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,16,0,0">
-                    <StackPanel>
-                        <UniformGrid Rows="1" Columns="4" Margin="0,0,0,4">
-                            <Border Style="{StaticResource MetricCardStyle}" Margin="0,0,8,0">
+                <StackPanel Margin="0,28,0,0">
+                    <!-- Stat strip -->
+                    <Border Style="{StaticResource SummaryStatStripStyle}" Margin="0,0,0,22">
+                        <UniformGrid Rows="1" Columns="4">
+                            <Border Style="{StaticResource SummaryStatItemStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="ÖĞRENCİ SAYISI" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="ÖĞRENCİ SAYISI" Style="{StaticResource SummaryCapsLabelStyle}"/>
                                     <TextBlock Text="{Binding Summary.TotalStudents}"
-                                               Style="{StaticResource MetricValueStyle}"
+                                               Style="{StaticResource SummaryMonoValueStyle}"
                                                Margin="0,8,0,0"/>
+                                    <TextBlock Text="Tüm öğrenciler sınava girdi"
+                                               FontSize="11.5"
+                                               Foreground="{DynamicResource SubtleBrush}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource MetricCardStyle}" Margin="4,0">
+
+                            <Border Style="{StaticResource SummaryStatItemStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="ORTALAMA PUAN" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="ORTALAMA PUAN" Style="{StaticResource SummaryCapsLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                         <TextBlock Text="{Binding Summary.AverageScore, StringFormat='{}{0:0.00}'}"
-                                                   Style="{StaticResource MetricValueStyle}"/>
-                                        <TextBlock Text=" / "
-                                                   Style="{StaticResource MetricValueStyle}"
-                                                   Foreground="{StaticResource SubtleBrush}"/>
-                                        <TextBlock Text="{Binding Summary.MaxPossibleScore, StringFormat='{}{0:0.#}'}"
-                                                   Style="{StaticResource MetricValueStyle}"
-                                                   Foreground="{StaticResource SubtleBrush}"/>
+                                                   Style="{StaticResource SummaryMonoValueStyle}"/>
+                                        <TextBlock Text="{Binding Summary.MaxPossibleScore, StringFormat=' / {0:0.#}'}"
+                                                   FontFamily="Geist Mono, JetBrains Mono, Consolas, Menlo, monospace"
+                                                   FontSize="14"
+                                                   Foreground="{DynamicResource SubtleBrush}"
+                                                   VerticalAlignment="Bottom"
+                                                   Margin="6,0,0,2"/>
                                     </StackPanel>
+                                    <TextBlock Text="{Binding Statistics.StandardDeviation, StringFormat='Standart sapma: {0:N1}', FallbackValue='Standart sapma: -'}"
+                                               FontSize="11.5"
+                                               Foreground="{DynamicResource SubtleBrush}"/>
                                 </StackPanel>
                             </Border>
-                            <Border Style="{StaticResource MetricCardStyle}" Margin="4,0">
+
+                            <Border Style="{StaticResource SummaryStatItemStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="BAŞARI ORANI" Style="{StaticResource MetricLabelStyle}"/>
-                                    <TextBlock Style="{StaticResource MetricValueStyle}"
-                                               Foreground="{StaticResource SuccessBrush}"
-                                               Margin="0,8,0,0">
-                                        <Run Text="%"/>
-                                        <Run Text="{Binding Summary.AverageSuccessRate}"/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource MetricCardStyle}" Margin="8,0,0,0">
-                                <StackPanel>
-                                    <TextBlock Text="EN YÜKSEK / EN DÜŞÜK" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="BAŞARI ORANI" Style="{StaticResource SummaryCapsLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                        <TextBlock Text="{Binding Summary.HighestScore}"
-                                                   Style="{StaticResource MetricValueStyle}"
-                                                   Foreground="{StaticResource SuccessBrush}"/>
-                                        <TextBlock Text=" / "
-                                                   Style="{StaticResource MetricValueStyle}"
-                                                   Foreground="{StaticResource SubtleBrush}"/>
-                                        <TextBlock Text="{Binding Summary.LowestScore}"
-                                                   Style="{StaticResource MetricValueStyle}"
-                                                   Foreground="{StaticResource DangerBrush}"/>
+                                        <TextBlock Text="{Binding Summary.AverageSuccessRate, StringFormat={}{0:N1}}"
+                                                   Style="{StaticResource SummaryMonoValueStyle}"
+                                                   Foreground="{DynamicResource WarningBrush}"/>
+                                        <TextBlock Text="%"
+                                                   FontFamily="Geist Mono, JetBrains Mono, Consolas, Menlo, monospace"
+                                                   FontSize="14"
+                                                   Foreground="{DynamicResource SubtleBrush}"
+                                                   VerticalAlignment="Bottom"
+                                                   Margin="6,0,0,2"/>
                                     </StackPanel>
+                                    <TextBlock Text="{Binding Summary.PassRate, StringFormat='Geçme oranı: {0:N1}%'}"
+                                               FontSize="11.5"
+                                               Foreground="{DynamicResource SubtleBrush}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource SummaryStatItemStyle}" BorderThickness="0">
+                                <StackPanel>
+                                    <TextBlock Text="EN YÜKSEK / EN DÜŞÜK" Style="{StaticResource SummaryCapsLabelStyle}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <TextBlock Text="{Binding Summary.HighestScore, StringFormat={}{0:0.#}}"
+                                                   Style="{StaticResource SummaryMonoValueStyle}"
+                                                   Foreground="{DynamicResource SuccessBrush}"/>
+                                        <TextBlock Text=" / "
+                                                   Style="{StaticResource SummaryMonoValueStyle}"
+                                                   Foreground="{DynamicResource SubtleBrush}"/>
+                                        <TextBlock Text="{Binding Summary.LowestScore, StringFormat={}{0:0.#}}"
+                                                   Style="{StaticResource SummaryMonoValueStyle}"
+                                                   Foreground="{DynamicResource DangerBrush}"/>
+                                    </StackPanel>
+                                    <TextBlock Text="Geniş varyasyon - gruplar farklı"
+                                               FontSize="11.5"
+                                               Foreground="{DynamicResource SubtleBrush}"/>
                                 </StackPanel>
                             </Border>
                         </UniformGrid>
+                    </Border>
 
-                        <Grid Margin="0,14,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.6*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
 
-                            <Border Style="{StaticResource CardStyle}" Grid.Column="0" Margin="0,0,8,14">
-                                <StackPanel>
-                                    <TextBlock Text="Sınıf Puan Dağılımı"
-                                               Style="{StaticResource SubheadingStyle}"/>
-                                    <TextBlock Text="Öğrenci sayısının puan aralıklarına göre dağılımı"
-                                               Style="{StaticResource CaptionStyle}"
-                                               Margin="0,-8,0,12"/>
-                                    <lvc:CartesianChart Height="250"
-                                                        Series="{Binding ScoreDistributionSeries}"
-                                                        XAxes="{Binding ScoreDistributionXAxes}"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Style="{StaticResource CardStyle}" Grid.Column="1" Margin="8,0,0,14">
-                                <StackPanel>
-                                    <TextBlock Text="Genel Doğru Oranı"
-                                               Style="{StaticResource SubheadingStyle}"/>
-                                    <TextBlock Text="Tüm sorularda doğru / yanlış / boş payı"
-                                               Style="{StaticResource CaptionStyle}"
-                                               Margin="0,-8,0,12"/>
-                                    <lvc:PieChart Height="250"
-                                                  Series="{Binding SuccessRateDoughnutSeries}"
-                                                  LegendPosition="Bottom"/>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource SummaryPanelStyle}" Grid.Column="0" Margin="0,0,14,0">
                             <StackPanel>
-                                <TextBlock Text="Soru Bazlı Başarı Oranları"
-                                           Style="{StaticResource SubheadingStyle}"/>
-                                <lvc:CartesianChart Height="280"
-                                                    Series="{Binding QuestionSuccessSeries}"
-                                                    XAxes="{Binding QuestionXAxes}"
-                                                    YAxes="{Binding QuestionYAxes}"/>
+                                <Grid Margin="0,0,0,18">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Sınıf Puan Dağılımı"
+                                                   Style="{StaticResource SummaryPanelTitleStyle}"/>
+                                        <TextBlock Text="Öğrencilerin puan aralıklarına göre dağılımı"
+                                                   Style="{StaticResource SummaryPanelSubtitleStyle}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <lvc:CartesianChart Height="260"
+                                                    Series="{Binding ScoreDistributionSeries}"
+                                                    XAxes="{Binding ScoreDistributionXAxes}"
+                                                    LegendPosition="Hidden"/>
                             </StackPanel>
                         </Border>
-                    </StackPanel>
-                </ScrollViewer>
+
+                        <Border Style="{StaticResource SummaryPanelStyle}" Grid.Column="1">
+                            <StackPanel>
+                                <TextBlock Text="Genel Doğru Oranı"
+                                           Style="{StaticResource SummaryPanelTitleStyle}"/>
+                                <TextBlock Text="Tüm sorularda toplam dağılım"
+                                           Style="{StaticResource SummaryPanelSubtitleStyle}"
+                                           Margin="0,2,0,18"/>
+                                <Grid Height="260">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid Width="168" Height="168" VerticalAlignment="Center">
+                                        <Ellipse Width="168"
+                                                 Height="168"
+                                                 Stroke="{DynamicResource ChipBgBrush}"
+                                                 StrokeThickness="22"
+                                                 Fill="Transparent"/>
+
+                                        <Path Stroke="{DynamicResource SuccessBrush}"
+                                              StrokeThickness="22"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              StrokeLineJoin="Round">
+                                            <Path.Data>
+                                                <MultiBinding Converter="{StaticResource DonutSegmentGeometryConverter}" ConverterParameter="0">
+                                                    <Binding Path="CorrectAnswerCount"/>
+                                                    <Binding Path="WrongAnswerCount"/>
+                                                    <Binding Path="EmptyAnswerCount"/>
+                                                </MultiBinding>
+                                            </Path.Data>
+                                        </Path>
+
+                                        <Path Stroke="{DynamicResource DangerBrush}"
+                                              StrokeThickness="22"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              StrokeLineJoin="Round">
+                                            <Path.Data>
+                                                <MultiBinding Converter="{StaticResource DonutSegmentGeometryConverter}" ConverterParameter="1">
+                                                    <Binding Path="CorrectAnswerCount"/>
+                                                    <Binding Path="WrongAnswerCount"/>
+                                                    <Binding Path="EmptyAnswerCount"/>
+                                                </MultiBinding>
+                                            </Path.Data>
+                                        </Path>
+
+                                        <Path Stroke="{DynamicResource SubtleBrush}"
+                                              StrokeThickness="22"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              StrokeLineJoin="Round"
+                                              Opacity="0.55">
+                                            <Path.Data>
+                                                <MultiBinding Converter="{StaticResource DonutSegmentGeometryConverter}" ConverterParameter="2">
+                                                    <Binding Path="CorrectAnswerCount"/>
+                                                    <Binding Path="WrongAnswerCount"/>
+                                                    <Binding Path="EmptyAnswerCount"/>
+                                                </MultiBinding>
+                                            </Path.Data>
+                                        </Path>
+
+                                        <StackPanel HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding CorrectAnswerRate, StringFormat={}{0:N1}%}"
+                                                       FontFamily="Geist Mono, JetBrains Mono, Consolas, Menlo, monospace"
+                                                       FontSize="28"
+                                                       FontWeight="Medium"
+                                                       Foreground="{DynamicResource SuccessBrush}"
+                                                       HorizontalAlignment="Center"/>
+                                            <TextBlock Text="DOĞRU"
+                                                       FontSize="10"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource SubtleBrush}"
+                                                       HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <StackPanel Grid.Column="1"
+                                                Margin="24,0,0,0"
+                                                VerticalAlignment="Center">
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Width="9" Height="9" CornerRadius="3" Background="{DynamicResource SuccessBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="Doğru" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="8,0,12,0"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding CorrectAnswerCount}" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" Margin="0,0,14,0"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding CorrectAnswerRate, StringFormat={}{0:N1}%}" FontSize="12" Foreground="{DynamicResource SubtleBrush}"/>
+                                        </Grid>
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Width="9" Height="9" CornerRadius="3" Background="{DynamicResource DangerBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="Yanlış" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="8,0,12,0"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding WrongAnswerCount}" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" Margin="0,0,14,0"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding WrongAnswerRate, StringFormat={}{0:N1}%}" FontSize="12" Foreground="{DynamicResource SubtleBrush}"/>
+                                        </Grid>
+                                        <Grid Margin="0,0,0,16">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Width="9" Height="9" CornerRadius="3" Background="{DynamicResource SubtleBrush}" Opacity="0.55" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="Boş" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="8,0,12,0"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding EmptyAnswerCount}" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" Margin="0,0,14,0"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding EmptyAnswerRate, StringFormat={}{0:N1}%}" FontSize="12" Foreground="{DynamicResource SubtleBrush}"/>
+                                        </Grid>
+                                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12"/>
+                                        <Grid>
+                                            <TextBlock Text="Toplam cevap"
+                                                       FontSize="11.5"
+                                                       Foreground="{DynamicResource SubtleBrush}"/>
+                                            <TextBlock Text="{Binding TotalAnswerCount}"
+                                                       HorizontalAlignment="Right"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border Style="{StaticResource SummaryPanelStyle}">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,18">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Soru Bazlı Başarı Oranları"
+                                               Style="{StaticResource SummaryPanelTitleStyle}"/>
+                                    <TextBlock Text="Her sorunun başarı yüzdesi ve bağlı olduğu öğrenim çıktısı"
+                                               Style="{StaticResource SummaryPanelSubtitleStyle}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                                    <ToggleButton Content="% Başarı"
+                                                  Style="{StaticResource SummaryPillToggleStyle}"
+                                                  IsChecked="{Binding IsSummaryQuestionSuccessSelected, Mode=OneWay}"
+                                                  Command="{Binding SelectSummaryQuestionMetricCommand}"
+                                                  CommandParameter="Success"/>
+                                    <ToggleButton Content="Güçlük (p)"
+                                                  Style="{StaticResource SummaryPillToggleStyle}"
+                                                  IsChecked="{Binding IsSummaryQuestionDifficultySelected, Mode=OneWay}"
+                                                  Command="{Binding SelectSummaryQuestionMetricCommand}"
+                                                  CommandParameter="Difficulty"/>
+                                    <ToggleButton Content="Ayırt edicilik"
+                                                  Style="{StaticResource SummaryPillToggleStyle}"
+                                                  IsChecked="{Binding IsSummaryQuestionDiscriminationSelected, Mode=OneWay}"
+                                                  Command="{Binding SelectSummaryQuestionMetricCommand}"
+                                                  CommandParameter="Discrimination"/>
+                                </StackPanel>
+                            </Grid>
+                            <lvc:CartesianChart Height="320"
+                                                Series="{Binding SummaryQuestionSeries}"
+                                                XAxes="{Binding SummaryQuestionXAxes}"
+                                                YAxes="{Binding SummaryQuestionYAxes}"
+                                                LegendPosition="Hidden"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </TabItem>
 
             <!-- ═══ SEKME 2: ÖĞRENİM ÇIKTILARI ═══ -->
             <TabItem Header="Öğrenim Çıktıları">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,16,0,0">
-                    <StackPanel>
+                    <StackPanel Margin="0,16,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <Border Style="{StaticResource CardStyle}" Grid.Column="0" Margin="0,0,8,14">
+                            <Border Style="{StaticResource BentoCardStyle}" Grid.Column="0" Margin="0,0,8,14">
                                 <StackPanel>
                                     <TextBlock Text="Çıktı Kapsam Yüzeyi"
                                                Style="{StaticResource SubheadingStyle}"
@@ -190,7 +661,7 @@
                                 </StackPanel>
                             </Border>
 
-                            <Border Style="{StaticResource CardStyle}" Grid.Column="1" Margin="8,0,0,14">
+                            <Border Style="{StaticResource BentoCardStyle}" Grid.Column="1" Margin="8,0,0,14">
                                 <StackPanel>
                                     <TextBlock Text="Çıktı Başarı Dağılımı"
                                                Style="{StaticResource SubheadingStyle}"
@@ -203,45 +674,86 @@
                             </Border>
                         </Grid>
 
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="Detaylı Çıktı Performansı"
                                            Style="{StaticResource SubheadingStyle}"
                                            ToolTip="ÖÇ, ders sonunda öğrencinin kazanması beklenen bilgi veya beceridir. Bu tablo her ÖÇ için kaç soru sorulduğunu ve sınıf başarısını gösterir."/>
-                                <DataGrid ItemsSource="{Binding LearningOutcomes}">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Çıktı" Binding="{Binding OutcomeName}" Width="*"/>
-                                        <DataGridTextColumn Header="Açıklama" Binding="{Binding Description}" Width="2*"/>
-                                        <DataGridTextColumn Header="Soru" Binding="{Binding RelatedQuestionCount}" Width="80"/>
-                                        <DataGridTextColumn Header="Başarı %" Binding="{Binding SuccessRate, StringFormat=N1}" Width="100"/>
-                                        <DataGridTemplateColumn Header="Seviye" Width="120">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <Border Style="{StaticResource BadgeStyle}"
-                                                            Background="{Binding PerformanceLevel, Converter={StaticResource LevelToBrush}}"
+                                <ItemsControl ItemsSource="{Binding LearningOutcomes}" Margin="0,8,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{DynamicResource BorderSubtleBrush}"
+                                                    BorderThickness="0,0,0,1"
+                                                    Padding="0,12">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="80"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="80"/>
+                                                        <ColumnDefinition Width="70"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Kod rozeti (DTO'da Code yok → OutcomeName ilk kelimesi) -->
+                                                    <Border Grid.Column="0"
+                                                            Background="{DynamicResource PrimaryLightBrush}"
+                                                            BorderBrush="{DynamicResource PrimaryBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{DynamicResource RadiusLg}"
+                                                            Padding="8,3"
+                                                            HorizontalAlignment="Left"
                                                             VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding PerformanceLevel}"
-                                                                   Foreground="White"
+                                                        <TextBlock Text="{Binding OutcomeName, Converter={StaticResource FirstWord}}"
+                                                                   Foreground="{DynamicResource PrimaryDarkBrush}"
                                                                    FontSize="11"
                                                                    FontWeight="SemiBold"/>
                                                     </Border>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                    </DataGrid.Columns>
-                                </DataGrid>
+
+                                                    <!-- Label + açıklama -->
+                                                    <StackPanel Grid.Column="1"
+                                                                Margin="14,0"
+                                                                VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding OutcomeName}"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   FontWeight="SemiBold"
+                                                                   TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding Description}"
+                                                                   FontSize="12"
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   Margin="0,2,0,0"
+                                                                   Visibility="{Binding Description, Converter={StaticResource BoolToVisibility}}"/>
+                                                    </StackPanel>
+
+                                                    <!-- Bar -->
+                                                    <ProgressBar Grid.Column="2"
+                                                                 Style="{StaticResource RateBarStyle}"
+                                                                 Value="{Binding SuccessRate, Mode=OneWay}"
+                                                                 Foreground="{Binding SuccessRate, Converter={StaticResource RateThresholdToBrush}, ConverterParameter=outcome}"
+                                                                 VerticalAlignment="Center"/>
+
+                                                    <!-- Yüzde -->
+                                                    <TextBlock Grid.Column="3"
+                                                               Text="{Binding SuccessRate, StringFormat={}%{0:N1}}"
+                                                               FontSize="14"
+                                                               FontWeight="Bold"
+                                                               Foreground="{Binding SuccessRate, Converter={StaticResource RateThresholdToBrush}, ConverterParameter=outcomeText}"
+                                                               HorizontalAlignment="Right"
+                                                               VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </Border>
                     </StackPanel>
-                </ScrollViewer>
             </TabItem>
 
             <!-- ═══ SEKME 3: SORULAR (Çeldirici + Sınav Soruları birleşik) ═══ -->
             <TabItem Header="Sorular">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,16,0,0">
-                    <StackPanel>
+                    <StackPanel Margin="0,16,0,0">
                         <!-- Sınav Soruları (yönetim — iptal) -->
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="Sınav Soruları"
                                            Style="{StaticResource SubheadingStyle}"/>
@@ -273,50 +785,50 @@
                         </Border>
 
                         <!-- Çeldirici Uyarı Kutusu -->
-                        <Border Style="{StaticResource CardStyle}"
-                                Background="#FFFBEB"
-                                BorderBrush="#FCD34D"
+                        <Border Style="{StaticResource BentoCardStyle}"
+                                Background="{DynamicResource WarningSubtleBgBrush}"
+                                BorderBrush="{DynamicResource WarningSubtleBorderBrush}"
                                 Visibility="{Binding StrongDistractors.Count, Converter={StaticResource BoolToVisibility}}">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                    <Border Width="8" Height="8" CornerRadius="4"
-                                            Background="{StaticResource WarningBrush}"
+                                    <Border Width="8" Height="8" CornerRadius="{DynamicResource RadiusLg}"
+                                            Background="{DynamicResource WarningBrush}"
                                             VerticalAlignment="Center"/>
                                     <TextBlock Text="Güçlü Çeldirici Tespit Edilen Sorular"
                                                FontSize="15" FontWeight="SemiBold"
-                                               Foreground="#92400E"
+                                               Foreground="{DynamicResource WarningSubtleTextBrush}"
                                                Margin="10,0,0,0"
                                                VerticalAlignment="Center"/>
                                 </StackPanel>
                                 <TextBlock Text="Yanlış yapan öğrencilerin %50'sinden fazlasının aynı şıkkı seçtiği sorular."
-                                           Foreground="#78350F"
+                                           Foreground="{DynamicResource WarningSubtleTextBrush}"
                                            Margin="0,2,0,12"/>
                                 <ItemsControl ItemsSource="{Binding StrongDistractors}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="{StaticResource CardBgBrush}"
-                                                    BorderBrush="{StaticResource BorderSubtleBrush}"
+                                            <Border Background="{DynamicResource CardBgBrush}"
+                                                    BorderBrush="{DynamicResource BorderSubtleBrush}"
                                                     BorderThickness="1"
-                                                    CornerRadius="6"
+                                                    CornerRadius="{DynamicResource RadiusLg}"
                                                     Padding="12,9"
                                                     Margin="0,0,0,6">
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock FontWeight="SemiBold"
-                                                               Foreground="{StaticResource TextPrimaryBrush}">
+                                                               Foreground="{DynamicResource TextPrimaryBrush}">
                                                         <Run Text="Soru "/>
                                                         <Run Text="{Binding QuestionNumber}"/>
                                                     </TextBlock>
                                                     <TextBlock Text="  ·  Doğru: "
-                                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
                                                     <TextBlock Text="{Binding CorrectOption}"
                                                                FontWeight="SemiBold"
-                                                               Foreground="{StaticResource SuccessBrush}"/>
+                                                               Foreground="{DynamicResource SuccessBrush}"/>
                                                     <TextBlock Text="  ·  Çeldirici: "
-                                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
                                                     <TextBlock Text="{Binding StrongestDistractorOption}"
                                                                FontWeight="SemiBold"
-                                                               Foreground="{StaticResource DangerBrush}"/>
-                                                    <TextBlock Foreground="{StaticResource TextSecondaryBrush}">
+                                                               Foreground="{DynamicResource DangerBrush}"/>
+                                                    <TextBlock Foreground="{DynamicResource TextSecondaryBrush}">
                                                         <Run Text="  ("/>
                                                         <Run Text="{Binding StrongestDistractorCount}"/>
                                                         <Run Text=" kişi · %"/>
@@ -332,7 +844,7 @@
                         </Border>
 
                         <!-- Şık Dağılımı Tablosu -->
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="Tüm Soruların Şık Dağılımı"
                                            Style="{StaticResource SubheadingStyle}"/>
@@ -355,14 +867,12 @@
                             </StackPanel>
                         </Border>
                     </StackPanel>
-                </ScrollViewer>
             </TabItem>
 
             <!-- ═══ SEKME 5: SINAV DENGESİ ═══ -->
             <TabItem Header="Sınav Dengesi">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,16,0,0">
-                    <StackPanel>
-                        <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Margin="0,16,0,0">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -374,10 +884,10 @@
                                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                         <TextBlock Text="{Binding BalanceReport.BalanceScore, FallbackValue='—'}"
                                                    Style="{StaticResource MetricValueStyle}"
-                                                   Foreground="{StaticResource SuccessBrush}"/>
+                                                   Foreground="{DynamicResource SuccessBrush}"/>
                                         <TextBlock Text="/100"
                                                    FontSize="18"
-                                                   Foreground="{StaticResource SubtleBrush}"
+                                                   Foreground="{DynamicResource SubtleBrush}"
                                                    VerticalAlignment="Bottom"
                                                    Margin="2,0,0,4"/>
                                     </StackPanel>
@@ -385,7 +895,7 @@
 
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock Text="Soruların öğrenim çıktıları arasında ne kadar dengeli dağıldığını gösterir."
-                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
                                                TextWrapping="Wrap"/>
                                     <TextBlock Margin="0,6,0,0"
                                                Style="{StaticResource CaptionStyle}">
@@ -401,29 +911,29 @@
                             </Grid>
                         </Border>
 
-                        <Border Style="{StaticResource CardStyle}"
+                        <Border Style="{StaticResource BentoCardStyle}"
                                 Visibility="{Binding BalanceReport.Warnings.Count, Converter={StaticResource BoolToVisibility}}">
                             <StackPanel>
                                 <TextBlock Text="Uyarılar" Style="{StaticResource SubheadingStyle}"/>
                                 <ItemsControl ItemsSource="{Binding BalanceReport.Warnings}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border CornerRadius="6"
+                                            <Border CornerRadius="{DynamicResource RadiusLg}"
                                                     Padding="12,10"
                                                     Margin="0,0,0,8"
                                                     BorderThickness="1,1,1,3">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
-                                                        <Setter Property="Background" Value="#FFFBEB"/>
-                                                        <Setter Property="BorderBrush" Value="{StaticResource WarningBrush}"/>
+                                                        <Setter Property="Background" Value="{DynamicResource WarningSubtleBgBrush}"/>
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Severity}" Value="Critical">
-                                                                <Setter Property="Background" Value="#FEF2F2"/>
-                                                                <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}"/>
+                                                                <Setter Property="Background" Value="{DynamicResource DangerSubtleBrush}"/>
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Severity}" Value="Info">
-                                                                <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
-                                                                <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                                                                <Setter Property="Background" Value="{DynamicResource PrimaryLightBrush}"/>
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -432,11 +942,11 @@
                                                     <TextBlock Text="{Binding Severity}"
                                                                FontWeight="SemiBold"
                                                                FontSize="11"
-                                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"/>
                                                     <TextBlock Text="{Binding Message}"
                                                                TextWrapping="Wrap"
                                                                Margin="0,3,0,0"
-                                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
                                                 </StackPanel>
                                             </Border>
                                         </DataTemplate>
@@ -451,14 +961,14 @@
                             <StackPanel>
                                 <TextBlock Text="Sınav dengeli görünüyor"
                                            FontWeight="SemiBold"
-                                           Foreground="#065F46"/>
+                                           Foreground="{DynamicResource SuccessEmphasisBrush}"/>
                                 <TextBlock Text="Soru dağılımı öğrenim çıktıları arasında makul biçimde yayılmış."
-                                           Foreground="#047857"
+                                           Foreground="{DynamicResource SuccessEmphasisBrush}"
                                            Margin="0,3,0,0"/>
                             </StackPanel>
                         </Border>
 
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="Öğrenim Çıktısı Kapsamı"
                                            Style="{StaticResource SubheadingStyle}"
@@ -474,25 +984,23 @@
                             </StackPanel>
                         </Border>
                     </StackPanel>
-                </ScrollViewer>
             </TabItem>
 
             <!-- ═══ SEKME 6: İSTATİSTİKLER (Sınav istatistikleri + Madde analizi) ═══ -->
             <TabItem Header="İstatistikler">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,16,0,0">
-                    <StackPanel>
-                        <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Margin="0,16,0,0">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="Sınav Betimsel İstatistikleri"
                                            Style="{StaticResource SubheadingStyle}"/>
                                 <TextBlock Text="Merkezi eğilim, dağılım, şekil ve iç tutarlılık ölçüleri."
-                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
                                            Margin="0,-8,0,14"/>
 
-                                <Border Background="{StaticResource PageBgBrush}"
-                                        BorderBrush="{StaticResource BorderSubtleBrush}"
+                                <Border Background="{DynamicResource PageBgBrush}"
+                                        BorderBrush="{DynamicResource BorderSubtleBrush}"
                                         BorderThickness="1"
-                                        CornerRadius="6"
+                                        CornerRadius="{DynamicResource RadiusLg}"
                                         Padding="14,10">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="Geçme Eşiği (%)"
@@ -504,12 +1012,12 @@
                                         <TextBlock Text="Geçme Notu:"
                                                    VerticalAlignment="Center"
                                                    Margin="24,0,8,0"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
                                         <TextBlock Text="{Binding Statistics.PassingScore, StringFormat={}{0:N2}, FallbackValue='—'}"
                                                    VerticalAlignment="Center"
                                                    FontWeight="Bold"
                                                    FontSize="15"
-                                                   Foreground="{StaticResource PrimaryBrush}"/>
+                                                   Foreground="{DynamicResource PrimaryBrush}"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -550,7 +1058,7 @@
                             </Border>
                         </UniformGrid>
 
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="Konum Ölçüleri (Çeyrekler)"
                                            Style="{StaticResource SubheadingStyle}"/>
@@ -584,7 +1092,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="Dağılım (Yayılım) Ölçüleri"
                                            Style="{StaticResource SubheadingStyle}"/>
@@ -624,7 +1132,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <Border Style="{StaticResource CardStyle}" Grid.Column="0" Margin="0,0,4,14">
+                            <Border Style="{StaticResource BentoCardStyle}" Grid.Column="0" Margin="0,0,4,14">
                                 <StackPanel>
                                     <TextBlock Text="Dağılım Şekli"
                                                Style="{StaticResource SubheadingStyle}"/>
@@ -643,7 +1151,7 @@
                                 </StackPanel>
                             </Border>
 
-                            <Border Style="{StaticResource CardStyle}" Grid.Column="1" Margin="4,0,0,14">
+                            <Border Style="{StaticResource BentoCardStyle}" Grid.Column="1" Margin="4,0,0,14">
                                 <StackPanel ToolTip="Cronbach alfa, sınavdaki maddelerin aynı genel beceriyi veya kazanım alanını ne kadar tutarlı ölçtüğünü gösterir. 0.80 üzeri çoğu durumda güçlü iç tutarlılık olarak yorumlanır.">
                                     <TextBlock Text="İç Tutarlılık (Cronbach α)"
                                                Style="{StaticResource SubheadingStyle}"/>
@@ -651,19 +1159,19 @@
                                                FontSize="34"
                                                FontWeight="Bold"
                                                HorizontalAlignment="Center"
-                                               Foreground="{StaticResource PrimaryBrush}"
+                                               Foreground="{DynamicResource PrimaryBrush}"
                                                Margin="0,8,0,0"/>
                                     <TextBlock Text="{Binding Statistics.CronbachAlphaInterpretation}"
                                                HorizontalAlignment="Center"
                                                FontWeight="Medium"
                                                FontSize="12"
-                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
                                                Margin="0,4,0,0"/>
                                 </StackPanel>
                             </Border>
                         </Grid>
 
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="Geçme / Kalma Durumu"
                                            Style="{StaticResource SubheadingStyle}"/>
@@ -673,7 +1181,7 @@
                                                    FontSize="28"
                                                    FontWeight="Bold"
                                                    HorizontalAlignment="Center"
-                                                   Foreground="{StaticResource SuccessBrush}"/>
+                                                   Foreground="{DynamicResource SuccessBrush}"/>
                                         <TextBlock Text="GEÇEN" Style="{StaticResource StatCaptionStyle}"/>
                                     </StackPanel>
                                     <StackPanel ToolTip="Kalan öğrenci sayısı, geçme eşiğinin altında kalan öğrencilerin toplamıdır.">
@@ -681,14 +1189,14 @@
                                                    FontSize="28"
                                                    FontWeight="Bold"
                                                    HorizontalAlignment="Center"
-                                                   Foreground="{StaticResource DangerBrush}"/>
+                                                   Foreground="{DynamicResource DangerBrush}"/>
                                         <TextBlock Text="KALAN" Style="{StaticResource StatCaptionStyle}"/>
                                     </StackPanel>
                                     <StackPanel ToolTip="Geçme oranı = geçen öğrenci sayısı / sınava giren öğrenci sayısı x 100.">
                                         <TextBlock HorizontalAlignment="Center"
                                                    FontSize="28"
                                                    FontWeight="Bold"
-                                                   Foreground="{StaticResource PrimaryBrush}">
+                                                   Foreground="{DynamicResource PrimaryBrush}">
                                             <Run Text="%"/>
                                             <Run Text="{Binding Statistics.PassRate, StringFormat={}{0:N1}, FallbackValue='—'}"/>
                                         </TextBlock>
@@ -698,7 +1206,7 @@
                             </StackPanel>
                         </Border>
                         <!-- Madde Analizi alt-bölümü -->
-                        <Border BorderBrush="{StaticResource BorderSubtleBrush}"
+                        <Border BorderBrush="{DynamicResource BorderSubtleBrush}"
                                 BorderThickness="0,1,0,0"
                                 Margin="0,8,0,16"
                                 Padding="0,16,0,0">
@@ -712,10 +1220,10 @@
                                 <TextBlock Text="Klasik Test Geliştirme — Madde Analizi"
                                            FontWeight="SemiBold"
                                            FontSize="14"
-                                           Foreground="{StaticResource PrimaryDarkBrush}"
+                                           Foreground="{DynamicResource PrimaryDarkBrush}"
                                            Margin="0,0,0,8"/>
                                 <TextBlock TextWrapping="Wrap"
-                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
                                            LineHeight="20">
                                     <Run FontWeight="SemiBold" Text="Güçlük (p):"/><Run Text=" doğru cevaplayan öğrenci sayısının toplam öğrenci sayısına oranıdır. 1'e yaklaştıkça madde kolay, 0'a yaklaştıkça zor."/>
                                     <LineBreak/>
@@ -734,7 +1242,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <Border Style="{StaticResource CardStyle}" Grid.Column="0" Margin="0,0,4,14">
+                            <Border Style="{StaticResource BentoCardStyle}" Grid.Column="0" Margin="0,0,4,14">
                                 <StackPanel>
                                     <TextBlock Text="Madde Güçlük İndeksleri (p)"
                                                Style="{StaticResource SubheadingStyle}"/>
@@ -745,7 +1253,7 @@
                                 </StackPanel>
                             </Border>
 
-                            <Border Style="{StaticResource CardStyle}" Grid.Column="1" Margin="4,0,0,14">
+                            <Border Style="{StaticResource BentoCardStyle}" Grid.Column="1" Margin="4,0,0,14">
                                 <StackPanel>
                                     <TextBlock Text="Madde Ayırt Edicilik İndeksleri (D)"
                                                Style="{StaticResource SubheadingStyle}"/>
@@ -757,7 +1265,7 @@
                             </Border>
                         </Grid>
 
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="Üst Grup (%27) vs Alt Grup (%27) Doğru Sayıları"
                                            Style="{StaticResource SubheadingStyle}"/>
@@ -769,7 +1277,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="Tüm Öğrencilerin Cevap Dağılımı"
                                            Style="{StaticResource SubheadingStyle}"/>
@@ -784,7 +1292,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="Madde Analizi Listesi"
                                            Style="{StaticResource SubheadingStyle}"/>
@@ -796,9 +1304,51 @@
                                         <DataGridTextColumn Header="Doğru" Binding="{Binding CorrectCount}" Width="60"/>
                                         <DataGridTextColumn Header="Yanlış" Binding="{Binding WrongCount}" Width="60"/>
                                         <DataGridTextColumn Header="Boş" Binding="{Binding EmptyCount}" Width="50"/>
-                                        <DataGridTextColumn Header="Güçlük (p)" Binding="{Binding DifficultyIndex, StringFormat=N3}" Width="90"/>
+                                        <DataGridTemplateColumn Header="Güçlük (p)" Width="180">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid VerticalAlignment="Center" Margin="0,0,4,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ProgressBar Grid.Column="0"
+                                                                     Style="{StaticResource RateBarStyle}"
+                                                                     Minimum="0" Maximum="1"
+                                                                     Value="{Binding DifficultyIndex, Mode=OneWay}"
+                                                                     Foreground="{Binding DifficultyIndex, Converter={StaticResource RateThresholdToBrush}, ConverterParameter=difficulty}"
+                                                                     VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding DifficultyIndex, StringFormat={}{0:N2}}"
+                                                                   Style="{StaticResource RateValueTextStyle}"
+                                                                   Margin="8,0,0,0"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
                                         <DataGridTextColumn Header="Güçlük Düzeyi" Binding="{Binding DifficultyCategory}" Width="120"/>
-                                        <DataGridTextColumn Header="Ayırt Ed. (D)" Binding="{Binding DiscriminationIndex, StringFormat=N3}" Width="100"/>
+                                        <DataGridTemplateColumn Header="Ayırt Ed. (D)" Width="180">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid VerticalAlignment="Center" Margin="0,0,4,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ProgressBar Grid.Column="0"
+                                                                     Style="{StaticResource RateBarStyle}"
+                                                                     Minimum="0" Maximum="1"
+                                                                     Value="{Binding DiscriminationIndex, Mode=OneWay}"
+                                                                     Foreground="{Binding DiscriminationIndex, Converter={StaticResource RateThresholdToBrush}, ConverterParameter=discrimination}"
+                                                                     VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding DiscriminationIndex, StringFormat={}{0:N2}}"
+                                                                   Style="{StaticResource RateValueTextStyle}"
+                                                                   Margin="8,0,0,0"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
                                         <DataGridTextColumn Header="Ayırt Ed. Düzeyi" Binding="{Binding DiscriminationCategory}" Width="140"/>
                                         <DataGridTextColumn Header="Madde Güv." Binding="{Binding ItemReliabilityIndex, StringFormat=N3}" Width="100"/>
                                         <DataGridTextColumn Header="Çeldirici Etk." Binding="{Binding DistractorEffectivenessIndex, StringFormat=N2}" Width="110"/>
@@ -809,7 +1359,6 @@
                             </StackPanel>
                         </Border>
                     </StackPanel>
-                </ScrollViewer>
             </TabItem>
 
             <!-- ═══ SEKME 8: ÖĞRENCİ SIRALAMASI ═══ -->
@@ -835,7 +1384,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0">
+                    <Border Grid.Row="1" Style="{StaticResource BentoCardStyle}" Margin="0">
                         <DataGrid ItemsSource="{Binding FilteredStudents}" RowHeight="44">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Sıra" Binding="{Binding ClassRank}" Width="60">
@@ -886,17 +1435,17 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Background="#FEF2F2"
-                                                                BorderBrush="#FECACA"
+                                                        <Border Background="{DynamicResource DangerSubtleBrush}"
+                                                                BorderBrush="{DynamicResource DangerSubtleBorderBrush}"
                                                                 BorderThickness="1"
-                                                                CornerRadius="4"
+                                                                CornerRadius="{DynamicResource RadiusLg}"
                                                                 Padding="8,3"
                                                                 Margin="0,2,6,2"
                                                                 ToolTip="Bu öğrencinin ilgili öğrenim çıktısındaki başarı oranı %50'nin altında.">
                                                             <TextBlock Text="{Binding}"
                                                                        FontSize="11"
                                                                        FontWeight="Medium"
-                                                                       Foreground="#991B1B"
+                                                                       Foreground="{DynamicResource DangerEmphasisBrush}"
                                                                        TextWrapping="Wrap"/>
                                                         </Border>
                                                     </DataTemplate>
@@ -911,15 +1460,15 @@
                 </Grid>
             </TabItem>
         </TabControl>
+        </Grid>
+        </ScrollViewer>
 
         <!-- Yükleme overlay -->
-        <views:LoadingOverlay Grid.Row="0" Grid.RowSpan="2"
-                              Message="Analiz hesaplanıyor..."
+        <views:LoadingOverlay Message="Analiz hesaplanıyor..."
                               Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
 
         <!-- Hata kartı -->
-        <Border Grid.Row="0" Grid.RowSpan="2"
-                Style="{StaticResource AlertErrorStyle}"
+        <Border Style="{StaticResource AlertErrorStyle}"
                 MaxWidth="640"
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center"
@@ -929,12 +1478,12 @@
                 <TextBlock Text="Analiz Yüklenirken Hata Oluştu"
                            FontSize="15"
                            FontWeight="SemiBold"
-                           Foreground="{StaticResource DangerBrush}"
+                           Foreground="{DynamicResource DangerBrush}"
                            Margin="0,0,0,8"/>
                 <TextBlock Text="{Binding ErrorMessage}"
                            TextWrapping="Wrap"
-                           Foreground="#7F1D1D"
-                           FontFamily="Consolas"
+                           Foreground="{DynamicResource DangerEmphasisBrush}"
+                           FontFamily="Geist Mono, JetBrains Mono, Consolas, Menlo, monospace"
                            FontSize="12"/>
             </StackPanel>
         </Border>

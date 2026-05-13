@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <RootNamespace>EduAnalytics.UI</RootNamespace>
-    <ApplicationIcon />
+    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
     <StartupObject>EduAnalytics.UI.App</StartupObject>
   </PropertyGroup>
 
@@ -22,12 +22,19 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc5.4" />
     <PackageReference Include="QuestPDF" Version="2026.2.4" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.0" />
+    <PackageReference Include="WPF-UI" Version="3.0.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EduAnalytics.Core\EduAnalytics.Core.csproj" />
     <ProjectReference Include="..\EduAnalytics.DataAccess\EduAnalytics.DataAccess.csproj" />
     <ProjectReference Include="..\EduAnalytics.Business\EduAnalytics.Business.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\AppIcon.ico" />
+    <Resource Include="Assets\AppIcon.ico" />
   </ItemGroup>
 
 </Project>

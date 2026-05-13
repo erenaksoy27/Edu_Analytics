@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Business.Dtos;
@@ -35,6 +35,9 @@ public partial class QuestionGroupEditorViewModel : ObservableObject
     [ObservableProperty] private bool _isSaving;
     [ObservableProperty] private string? _errorMessage;
     [ObservableProperty] private string? _successMessage;
+    [ObservableProperty] private string? _courseError;
+    [ObservableProperty] private string? _stemTextError;
+    [ObservableProperty] private string? _subQuestionsError;
 
     public QuestionGroupEditorViewModel(IQuestionBankService bankService, IExamCrudService examService)
     {
@@ -59,7 +62,13 @@ public partial class QuestionGroupEditorViewModel : ObservableObject
         }
     }
 
-    partial void OnSelectedCourseChanged(Course? value) => _ = ReloadTopicsAsync();
+    partial void OnSelectedCourseChanged(Course? value)
+    {
+        CourseError = null;
+        _ = ReloadTopicsAsync();
+    }
+
+    partial void OnStemTextChanged(string value) => StemTextError = null;
 
     private async Task ReloadTopicsAsync()
     {
@@ -100,6 +109,7 @@ public partial class QuestionGroupEditorViewModel : ObservableObject
     [RelayCommand]
     private void AddSubQuestion()
     {
+        SubQuestionsError = null;
         var q = new QuestionEditViewModel
         {
             QuestionNumber = SubQuestions.Count + 1
@@ -114,30 +124,42 @@ public partial class QuestionGroupEditorViewModel : ObservableObject
     {
         if (q == null) return;
         SubQuestions.Remove(q);
+        if (SubQuestions.Count < 2)
+            SubQuestionsError = "Common-stem grubu için en az 2 alt soru gerekli.";
         for (int i = 0; i < SubQuestions.Count; i++)
             SubQuestions[i].QuestionNumber = i + 1;
     }
 
-    [RelayCommand]
-    private async Task SaveAsync()
+    private void ClearFormErrors()
     {
-        ErrorMessage = null;
-        SuccessMessage = null;
+        CourseError = null;
+        StemTextError = null;
+        SubQuestionsError = null;
+        foreach (var q in SubQuestions)
+            q.ClearValidationErrors();
+    }
+
+    private bool ValidateForm()
+    {
+        ClearFormErrors();
 
         if (SelectedCourse == null)
         {
-            ErrorMessage = "Ders seçmelisiniz.";
-            return;
+            CourseError = "Ders seçmelisiniz.";
+            ErrorMessage = CourseError;
+            return false;
         }
         if (string.IsNullOrWhiteSpace(StemText))
         {
+            StemTextError = "Gövde metni zorunlu.";
             ErrorMessage = "Gövde metni boş olamaz (tablo/paragraf/açıklama).";
-            return;
+            return false;
         }
         if (SubQuestions.Count < 2)
         {
+            SubQuestionsError = "En az 2 alt soru eklemelisiniz.";
             ErrorMessage = "Common-stem grubu için en az 2 alt soru eklemelisiniz.";
-            return;
+            return false;
         }
 
         foreach (var q in SubQuestions)
@@ -146,9 +168,21 @@ public partial class QuestionGroupEditorViewModel : ObservableObject
             if (err != null)
             {
                 ErrorMessage = err;
-                return;
+                return false;
             }
         }
+
+        return true;
+    }
+
+    [RelayCommand]
+    private async Task SaveAsync()
+    {
+        ErrorMessage = null;
+        SuccessMessage = null;
+
+        if (!ValidateForm())
+            return;
 
         IsSaving = true;
         try

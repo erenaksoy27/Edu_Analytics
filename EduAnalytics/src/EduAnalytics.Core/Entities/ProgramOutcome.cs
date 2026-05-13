@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Entities;
+﻿namespace EduAnalytics.Core.Entities;
 
 /// <summary>
 /// Program Çıktısı (PÇ). Bir programın mezunundan beklenen yetkinlik.

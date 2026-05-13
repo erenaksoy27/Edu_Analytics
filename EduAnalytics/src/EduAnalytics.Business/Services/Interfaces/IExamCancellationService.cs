@@ -1,4 +1,4 @@
-namespace EduAnalytics.Business.Services.Interfaces;
+﻿namespace EduAnalytics.Business.Services.Interfaces;
 
 /// <summary>
 /// Sınav sırasında veya sonrasında bir sorunun iptal edilmesi.

@@ -1,4 +1,4 @@
-using EduAnalytics.Business.Services.Implementations;
+﻿using EduAnalytics.Business.Services.Implementations;
 using EduAnalytics.Core.Enums;
 using EduAnalytics.DataAccess.Context;
 using EduAnalytics.DataAccess.Seed;
@@ -52,9 +52,9 @@ try
     }
     Console.WriteLine();
 
-    // ─── 4. KONU BAZLI BAŞARI ───────────────────────────────────────
+    // ─── 4. KONU BAZLI BA�?ARI ───────────────────────────────────────
     Console.WriteLine("════════════════════════════════════════════════════════════════════");
-    Console.WriteLine("  2) KONU BAZLI BAŞARI (Bologna Çıktıları)");
+    Console.WriteLine("  2) KONU BAZLI BA�?ARI (Bologna Çıktıları)");
     Console.WriteLine("════════════════════════════════════════════════════════════════════");
     var topics = await topicPerf.AnalyzeExamAsync(examId);
     Console.WriteLine("  Hafta  Konu                              Soru  Başarı    Seviye");
@@ -103,9 +103,9 @@ try
     }
     Console.WriteLine();
 
-    // ─── 6. ÖĞRENCİ SIRALAMASI ─────────────────────────────────────
+    // ─── 6. Ö�?RENCİ SIRALAMASI ─────────────────────────────────────
     Console.WriteLine("════════════════════════════════════════════════════════════════════");
-    Console.WriteLine("  4) ÖĞRENCİ SIRALAMASI (İlk 10)");
+    Console.WriteLine("  4) Ö�?RENCİ SIRALAMASI (İlk 10)");
     Console.WriteLine("════════════════════════════════════════════════════════════════════");
     var ranking = await studentPerf.GetExamRankingAsync(examId);
     Console.WriteLine("  Sıra  Numara    Öğrenci                   Doğru  Başarı  Zayıf Konular");
@@ -133,7 +133,7 @@ try
 catch (Exception ex)
 {
     Console.WriteLine();
-    Console.WriteLine("✗ HATA OLUŞTU:");
+    Console.WriteLine("✗ HATA OLU�?TU:");
     Console.WriteLine($"  {ex.GetType().Name}: {ex.Message}");
     if (ex.InnerException != null)
         Console.WriteLine($"  İç Hata: {ex.InnerException.Message}");

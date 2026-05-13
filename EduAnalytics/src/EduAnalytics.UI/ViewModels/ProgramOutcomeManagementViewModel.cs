@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -298,7 +298,7 @@ public partial class ProgramOutcomeManagementViewModel : ObservableObject
     private async Task DeleteAsync(ProgramOutcomeDto? po)
     {
         if (po == null) return;
-        var confirm = System.Windows.MessageBox.Show(
+        var confirm = EduAnalytics.UI.Services.AppMessageBox.Show(
             $"{po.Code} silinsin mi? Bağlı ÖÇ eşleşmeleri de kaldırılacak.",
             "PÇ Sil",
             System.Windows.MessageBoxButton.YesNo,

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:EduAnalytics.UI.ViewModels"
              xmlns:views="clr-namespace:EduAnalytics.UI.Views"
+             xmlns:ctl="clr-namespace:EduAnalytics.UI.Controls"
              xmlns:enums="clr-namespace:EduAnalytics.Core.Enums;assembly=EduAnalytics.Core"
              xmlns:mi="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              d:DataContext="{d:DesignInstance Type=vm:ExamManagementViewModel}"
@@ -10,37 +11,36 @@
              mc:Ignorable="d"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
 
-    <Grid>
+    <Grid Style="{StaticResource PageRootGridStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,18">
-            <TextBlock Text="Sınav Yönetimi" Style="{StaticResource HeadingStyle}"/>
-            <TextBlock Text="Oluşturulan sınavları görüntüleyin, analiz ekranına geçin veya temel bilgileri düzenleyin."
-                       Style="{StaticResource PageSubtitleStyle}"/>
-        </StackPanel>
+        <ctl:PageHeader Grid.Row="0"
+                        Icon="FileDocumentMultipleOutline"
+                        Title="Sınav Yönetimi"
+                        Subtitle="Oluşturulan sınavları görüntüleyin, analiz ekranına geçin veya temel bilgileri düzenleyin."/>
 
         <StackPanel Grid.Row="1">
             <Border Style="{StaticResource AlertErrorStyle}"
                     Margin="0,0,0,8"
                     Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}">
-                <TextBlock Text="{Binding ErrorMessage}" Foreground="#991B1B" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerEmphasisBrush}" TextWrapping="Wrap"/>
             </Border>
             <Border Style="{StaticResource AlertSuccessStyle}"
                     Margin="0,0,0,8"
                     Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisibility}}">
-                <TextBlock Text="{Binding SuccessMessage}" Foreground="#064E3B" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding SuccessMessage}" Foreground="{DynamicResource SuccessEmphasisBrush}" TextWrapping="Wrap"/>
             </Border>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Style="{StaticResource PageScrollViewerStyle}" Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <ItemsControl ItemsSource="{Binding Exams}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource CardStyle}">
+                        <Border Style="{StaticResource BentoCardStyle}">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -56,22 +56,22 @@
                                 <StackPanel Grid.Column="0" Margin="0,0,18,0">
                                     <TextBlock Text="{Binding Title}"
                                                FontSize="17" FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                        <Border Background="{StaticResource PrimaryLightBrush}" CornerRadius="4" Padding="7,3" Margin="0,0,8,0">
-                                            <TextBlock Text="{Binding ExamType}" Foreground="{StaticResource PrimaryBrush}"
+                                        <Border Background="{DynamicResource PrimaryLightBrush}" CornerRadius="{DynamicResource RadiusLg}" Padding="7,3" Margin="0,0,8,0">
+                                            <TextBlock Text="{Binding ExamType}" Foreground="{DynamicResource PrimaryBrush}"
                                                        FontSize="11" FontWeight="SemiBold"/>
                                         </Border>
                                         <TextBlock Text="{Binding CourseName}"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                                    VerticalAlignment="Center"/>
-                                        <TextBlock Text="  /  " Foreground="{StaticResource SubtleBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="  /  " Foreground="{DynamicResource SubtleBrush}" VerticalAlignment="Center"/>
                                         <TextBlock Text="{Binding ExamDate, StringFormat='{}{0:dd.MM.yyyy}'}"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                                    VerticalAlignment="Center"/>
-                                        <TextBlock Text="  /  " Foreground="{StaticResource SubtleBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="  /  " Foreground="{DynamicResource SubtleBrush}" VerticalAlignment="Center"/>
                                         <TextBlock VerticalAlignment="Center"
-                                                   Foreground="{StaticResource TextSecondaryBrush}">
+                                                   Foreground="{DynamicResource TextSecondaryBrush}">
                                             <Run Text="{Binding DurationMinutes}"/>
                                             <Run Text=" dk"/>
                                         </TextBlock>
@@ -89,7 +89,7 @@
                                     <TextBlock Text="{Binding TotalAnswers}"
                                                FontSize="20" FontWeight="Bold"
                                                HorizontalAlignment="Center"
-                                               Foreground="{StaticResource PrimaryBrush}"/>
+                                               Foreground="{DynamicResource PrimaryBrush}"/>
                                     <TextBlock Text="Cevap" Style="{StaticResource MetricLabelStyle}"
                                                HorizontalAlignment="Center"/>
                                 </StackPanel>
@@ -118,10 +118,10 @@
                                 </StackPanel>
 
                                 <Border Grid.Row="1" Grid.ColumnSpan="4"
-                                        Background="{StaticResource PageBgBrush}"
-                                        BorderBrush="{StaticResource BorderSubtleBrush}"
+                                        Background="{DynamicResource PageBgBrush}"
+                                        BorderBrush="{DynamicResource BorderSubtleBrush}"
                                         BorderThickness="1"
-                                        CornerRadius="8"
+                                        CornerRadius="{DynamicResource RadiusLg}"
                                         Padding="12"
                                         Margin="0,16,0,0">
                                     <StackPanel>
@@ -144,25 +144,25 @@
                                                                    Text="{Binding QuestionNumber, StringFormat={}S{0}}"
                                                                    FontSize="11"
                                                                    FontWeight="SemiBold"
-                                                                   Foreground="{StaticResource PrimaryBrush}"/>
+                                                                   Foreground="{DynamicResource PrimaryBrush}"/>
                                                         <Border Grid.Column="1"
-                                                                Background="{StaticResource PrimaryLightBrush}"
-                                                                CornerRadius="4"
+                                                                Background="{DynamicResource PrimaryLightBrush}"
+                                                                CornerRadius="{DynamicResource RadiusLg}"
                                                                 Padding="5,2"
                                                                 Margin="0,0,8,0">
                                                             <TextBlock Text="{Binding Type}"
                                                                        FontSize="10"
-                                                                       Foreground="{StaticResource PrimaryBrush}"/>
+                                                                       Foreground="{DynamicResource PrimaryBrush}"/>
                                                         </Border>
                                                         <TextBlock Grid.Column="2"
                                                                    Text="{Binding QuestionText}"
                                                                    TextWrapping="Wrap"
                                                                    FontSize="12"
-                                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
                                                         <TextBlock Grid.Column="3"
                                                                    HorizontalAlignment="Right"
                                                                    FontSize="11"
-                                                                   Foreground="{StaticResource TextSecondaryBrush}">
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}">
                                                             <Run Text="{Binding MaxPoints}"/>
                                                             <Run Text=" p"/>
                                                         </TextBlock>
@@ -183,10 +183,10 @@
                     Style="{StaticResource EmptyStateStyle}"
                     Visibility="{Binding Exams.Count, Converter={StaticResource CollectionEmptyToVisibility}}">
             <mi:MaterialIcon Kind="FileDocumentOutline" Width="48" Height="48"
-                             Foreground="{StaticResource SubtleBrush}"
+                             Foreground="{DynamicResource SubtleBrush}"
                              HorizontalAlignment="Center"/>
             <TextBlock Text="Henüz sınav yok" Style="{StaticResource EmptyStateTitleStyle}"/>
-            <TextBlock Text="Bankadan Sınav ekranından yeni sınav oluşturabilirsiniz."
+            <TextBlock Text="Sınav Oluştur ekranından yeni sınav oluşturabilirsiniz."
                        Style="{StaticResource EmptyStateDescriptionStyle}"/>
         </StackPanel>
 
@@ -194,13 +194,13 @@
                               Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
 
         <Border Grid.RowSpan="3"
-                Background="#80000000"
+                Background="{DynamicResource OverlayBrush}"
                 Visibility="{Binding IsEditDialogOpen, Converter={StaticResource BoolToVisibility}}">
-            <Border Background="{StaticResource CardBgBrush}"
-                    CornerRadius="8"
+            <Border Background="{DynamicResource CardBgBrush}"
+                    CornerRadius="{DynamicResource RadiusLg}"
                     Padding="24"
                     Width="540"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="1"
                     VerticalAlignment="Center" HorizontalAlignment="Center">
                 <StackPanel>

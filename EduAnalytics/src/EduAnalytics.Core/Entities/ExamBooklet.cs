@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Entities;
+﻿namespace EduAnalytics.Core.Entities;
 
 /// <summary>
 /// Sınav kitapçığı (A, B, C, D...). BookletCount &gt; 1 olan sınavlarda farklı kitapçıklarda

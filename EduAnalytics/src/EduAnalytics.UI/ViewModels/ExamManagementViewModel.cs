@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EduAnalytics.Business.Dtos;
@@ -133,7 +133,7 @@ public partial class ExamManagementViewModel : ObservableObject
             ? $"\n\nBu sınava {item.TotalAnswers} cevap girilmiş. Silinince bu cevaplar da kaybolur."
             : string.Empty;
 
-        var confirm = System.Windows.MessageBox.Show(
+        var confirm = EduAnalytics.UI.Services.AppMessageBox.Show(
             $"\"{item.Title}\" sınavını silmek istediğinize emin misiniz?{warning}",
             "Sınav Sil",
             System.Windows.MessageBoxButton.YesNo,

@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Entities;
+﻿namespace EduAnalytics.Core.Entities;
 
 /// <summary>
 /// Kitapçık-bazlı soru sırası ve şık permütasyon haritası.
@@ -15,7 +15,7 @@ public class ExamBookletQuestion
     /// <summary>Bu kitapçıkta sorunun sırası.</summary>
     public int OrderInBooklet { get; set; }
 
-    /// <summary>Şık permütasyon haritası. null = şıklar karıştırılmamış.</summary>
+    /// <summary>�?ık permütasyon haritası. null = şıklar karıştırılmamış.</summary>
     public string? OptionShuffleMap { get; set; }
 
     // Navigation Properties

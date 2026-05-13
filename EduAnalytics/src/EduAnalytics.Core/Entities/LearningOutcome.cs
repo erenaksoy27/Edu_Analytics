@@ -1,4 +1,4 @@
-namespace EduAnalytics.Core.Entities;
+﻿namespace EduAnalytics.Core.Entities;
 
 /// <summary>
 /// Öğrenim Çıktısı (ÖÇ). Her ÖÇ tek bir derse aittir (CourseId zorunlu).

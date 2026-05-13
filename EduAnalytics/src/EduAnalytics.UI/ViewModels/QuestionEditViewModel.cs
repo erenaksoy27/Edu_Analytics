@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
@@ -32,6 +32,11 @@ public partial class QuestionEditViewModel : ObservableObject
     [ObservableProperty] private string _optionE = string.Empty;
     [ObservableProperty] private OptionLetter _correctOption = OptionLetter.A;
     [ObservableProperty] private string _answerKey = string.Empty;
+
+    [ObservableProperty] private string? _questionTextError;
+    [ObservableProperty] private string? _maxPointsError;
+    [ObservableProperty] private string? _optionsError;
+    [ObservableProperty] private string? _correctOptionError;
 
     /// <summary>UI'da gösterilecek şık harfleri (Test sorusunda radio button'lar için).</summary>
     public OptionLetter[] AvailableOptions { get; } =
@@ -86,6 +91,14 @@ public partial class QuestionEditViewModel : ObservableObject
     }
 
     partial void OnLearningOutcomeFilterChanged(string value) => LearningOutcomesView.Refresh();
+    partial void OnQuestionTextChanged(string value) => QuestionTextError = null;
+    partial void OnMaxPointsChanged(decimal value) => MaxPointsError = null;
+    partial void OnOptionAChanged(string value) => OptionsError = null;
+    partial void OnOptionBChanged(string value) => OptionsError = null;
+    partial void OnOptionCChanged(string value) => OptionsError = null;
+    partial void OnOptionDChanged(string value) => OptionsError = null;
+    partial void OnOptionEChanged(string value) => OptionsError = null;
+    partial void OnCorrectOptionChanged(OptionLetter value) => CorrectOptionError = null;
 
     // ----------------------------------
 
@@ -131,10 +144,20 @@ public partial class QuestionEditViewModel : ObservableObject
     /// </summary>
     partial void OnTypeChanged(QuestionType value)
     {
+        ClearValidationErrors();
+
         if (value == QuestionType.MultipleChoice && MaxPoints > 5)
             MaxPoints = 1.0m;
         else if (value == QuestionType.OpenEnded && MaxPoints <= 1)
             MaxPoints = 5.0m;
+    }
+
+    public void ClearValidationErrors()
+    {
+        QuestionTextError = null;
+        MaxPointsError = null;
+        OptionsError = null;
+        CorrectOptionError = null;
     }
 
     /// <summary>
@@ -168,19 +191,33 @@ public partial class QuestionEditViewModel : ObservableObject
     /// </summary>
     public string? Validate()
     {
+        ClearValidationErrors();
+
         if (string.IsNullOrWhiteSpace(QuestionText))
+        {
+            QuestionTextError = "Soru metni zorunlu.";
             return $"Soru {QuestionNumber}: Soru metni boş olamaz.";
+        }
         if (MaxPoints <= 0)
+        {
+            MaxPointsError = "Puan 0'dan büyük olmalı.";
             return $"Soru {QuestionNumber}: Puan 0'dan büyük olmalı.";
+        }
 
         if (IsMultipleChoice)
         {
             if (string.IsNullOrWhiteSpace(OptionA) || string.IsNullOrWhiteSpace(OptionB) ||
                 string.IsNullOrWhiteSpace(OptionC) || string.IsNullOrWhiteSpace(OptionD) 
                 || string.IsNullOrWhiteSpace(OptionE))
+            {
+                OptionsError = "Test sorularında A/B/C/D/E şıklarının tamamı doldurulmalı.";
                 return $"Soru {QuestionNumber}: Tüm şıklar (A/B/C/D/E) doldurulmalı.";
+            }
             if (CorrectOption == OptionLetter.Empty)
+            {
+                CorrectOptionError = "Doğru şık seçilmeli.";
                 return $"Soru {QuestionNumber}: Doğru şık seçilmeli.";
+            }
         }
 
         return null;

@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;

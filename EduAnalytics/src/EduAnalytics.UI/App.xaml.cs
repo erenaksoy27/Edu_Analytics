@@ -1,10 +1,12 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Threading;
+using System.Net.Http;
 using EduAnalytics.Business.Services.Implementations;
 using EduAnalytics.Business.Services.Interfaces;
 using EduAnalytics.DataAccess.Context;
 using EduAnalytics.DataAccess.Seed;
 using EduAnalytics.UI.Services;
+using EduAnalytics.UI.Services.AIAssistant;
 using EduAnalytics.UI.ViewModels;
 using EduAnalytics.UI.Views;
 using Microsoft.EntityFrameworkCore;
@@ -19,52 +21,118 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-        var services = new ServiceCollection();
-        ConfigureServices(services);
-        Services = services.BuildServiceProvider();
-
-        var splash = new SplashWindow();
-        splash.Show();
-
-        // Let WPF render the splash before blocking work starts
-        await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Loaded);
-
-        Exception? startupError = null;
-        await Task.WhenAll(
-            Task.Run(() =>
-            {
-                try
-                {
-                    var ctx = Services.GetRequiredService<EduAnalyticsDbContext>();
-                    DbInitializer.Seed(ctx);
-                    ctx.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    startupError = ex;
-                }
-            }),
-            Task.Delay(600)
-        );
-
-        if (startupError != null)
+        try
         {
-            splash.Close();
-            MessageBox.Show(
-                $"Veritabanı başlatılamadı:\n\n{startupError.GetType().Name}: {startupError.Message}\n\n{startupError.InnerException?.Message}",
+            var services = new ServiceCollection();
+            ConfigureServices(services);
+            Services = services.BuildServiceProvider();
+
+            // Splash ve giriş ekranı sistemin o anki Light/Dark modunu takip eder.
+            var themeService = Services.GetRequiredService<IThemeService>();
+            themeService.ApplySystemForStartup();
+
+            var splash = new SplashWindow();
+            splash.Show();
+
+            // Let WPF render the splash before blocking work starts
+            await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Loaded);
+
+            Exception? startupError = null;
+            await Task.WhenAll(
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        SeedDatabaseWithRetry();
+                    }
+                    catch (Exception ex)
+                    {
+                        startupError = ex;
+                    }
+                }),
+                Task.Delay(600)
+            );
+
+            if (startupError != null)
+            {
+                splash.Close();
+                AppMessageBox.Show(
+                    $"Veritabanı başlatılamadı:\n\n{startupError.GetType().Name}: {startupError.Message}\n\n{startupError.InnerException?.Message}\n\nLocalDB hala açılmıyorsa SQL Server LocalDB instance'ını yeniden başlatmayı deneyin.",
+                    "Başlangıç Hatası",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown();
+                return;
+            }
+
+            await splash.FadeOutAndCloseAsync();
+
+            var loginWindow = Services.GetRequiredService<LoginWindow>();
+            if (loginWindow.ShowDialog() != true)
+            {
+                Shutdown();
+                return;
+            }
+
+            // Ana uygulama açılırken kullanıcının uygulama içi tema tercihi varsa geri yüklenir.
+            themeService.LoadAndApply();
+
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+            MainWindow = mainWindow;
+            ShutdownMode = ShutdownMode.OnMainWindowClose;
+            mainWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            AppMessageBox.Show(
+                $"Uygulama başlatılırken beklenmeyen bir hata oluştu:\n\n{ex.GetType().Name}: {ex.Message}\n\n{ex.InnerException?.Message}",
                 "Başlangıç Hatası",
                 MessageBoxButton.OK, MessageBoxImage.Error);
-            Shutdown();
-            return;
+            Application.Current.Shutdown();
+        }
+    }
+
+    private static void SeedDatabaseWithRetry()
+    {
+        const int maxAttempts = 4;
+        Exception? lastError = null;
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                using var ctx = Services.GetRequiredService<EduAnalyticsDbContext>();
+                DbInitializer.Seed(ctx);
+                return;
+            }
+            catch (Exception ex) when (attempt < maxAttempts && IsTransientLocalDbStartupError(ex))
+            {
+                lastError = ex;
+                Thread.Sleep(TimeSpan.FromMilliseconds(650 * attempt));
+            }
         }
 
-        // Tema: splash görünürken yükle (kullanıcı değişimi hissetmez)
-        Services.GetRequiredService<IThemeService>().LoadAndApply();
+        throw lastError ?? new InvalidOperationException("Veritabanı başlatılamadı.");
+    }
 
-        var mainWindow = Services.GetRequiredService<MainWindow>();
-        mainWindow.Show();
-        await splash.FadeOutAndCloseAsync();
+    private static bool IsTransientLocalDbStartupError(Exception ex)
+    {
+        for (var current = ex; current != null; current = current.InnerException)
+        {
+            var message = current.Message.ToLowerInvariant();
+            if (message.Contains("localdb") ||
+                message.Contains("error: 50") ||
+                message.Contains("0x89c5010a") ||
+                message.Contains("failed to start") ||
+                message.Contains("network-related") ||
+                message.Contains("instance-specific"))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static void ConfigureServices(ServiceCollection services)
@@ -129,10 +197,20 @@ public partial class App : Application
         services.AddTransient<RubricGradeDialogViewModel>();
 
         // UI altyapı
+        services.AddSingleton<IAppLogService, AppLogService>();
         services.AddSingleton<ToastService>();
         services.AddSingleton<IThemeService, ThemeService>();
+        services.AddSingleton<IUserProfileService, UserProfileService>();
+        services.AddSingleton(_ => new HttpClient { Timeout = TimeSpan.FromSeconds(60) });
+        services.AddSingleton<IAISettingsService, AISettingsService>();
+        services.AddSingleton<IAIProvider, ClaudeProvider>();
+        services.AddSingleton<IAIProvider, OpenAIProvider>();
+        services.AddSingleton<IAIProvider, GeminiProvider>();
+        services.AddSingleton<IAIAssistantService, AIAssistantService>();
 
         // Windows
         services.AddTransient<MainWindow>();
+        services.AddTransient<LoginWindow>();
+        services.AddTransient<UserSettingsDialog>();
     }
 }

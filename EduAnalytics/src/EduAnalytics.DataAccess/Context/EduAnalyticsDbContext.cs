@@ -1,4 +1,4 @@
-using EduAnalytics.Core.Entities;
+﻿using EduAnalytics.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduAnalytics.DataAccess.Context;
